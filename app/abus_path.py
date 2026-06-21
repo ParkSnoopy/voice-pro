@@ -96,7 +96,7 @@ def path_workspace_folder():
 
 def path_gradio_folder():
     script_dir = os.getcwd()
-    gradio_folder = os.path.join(script_dir, "installer_files", "gradio")
+    gradio_folder = os.path.join(script_dir, "installer", "gradio")
     logger.debug(f"[abus_path.py] path_gradio_folder: {gradio_folder}")
 
     if not os.path.exists(gradio_folder):

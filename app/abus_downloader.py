@@ -74,7 +74,7 @@ class YoutubeDownloader:
         maxDuration: int = None,
     ):
         ydl_opts = {}
-        cache_dir = os.path.join(os.getcwd(), "installer_files", "yt-dlp-cache")
+        cache_dir = os.path.join(os.getcwd(), "installer", "yt-dlp-cache")
         os.makedirs(cache_dir, exist_ok=True)
         ydl_opts["cachedir"] = cache_dir
         ydl_opts["keepvideo"] = False

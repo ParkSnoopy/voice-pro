@@ -11,13 +11,13 @@ class OneClick:
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     env_path = os.environ.get(
-        "INSTALL_ENV_DIR", os.path.join(script_dir, "installer_files", "env")
+        "INSTALL_ENV_DIR", os.path.join(script_dir, "installer", "env")
     )
     app_model_path = os.path.join(script_dir, "model")
 
     @classmethod
     def configure_runtime_paths(cls):
-        install_dir = os.path.join(cls.script_dir, "installer_files")
+        install_dir = os.path.join(cls.script_dir, "installer")
         temp_dir = os.path.join(install_dir, "tmp")
         hf_home = os.path.join(cls.app_model_path, ".hf_cache")
         hf_hub_cache = os.path.join(hf_home, "hub")

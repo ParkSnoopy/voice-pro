@@ -165,7 +165,7 @@ cython_debug/
 *.c
 /chunks
 /workspace
-/installer_files
+/installer
 /model/rvc-model
 /model/faster-whisper
 /rvc/models

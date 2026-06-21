@@ -91,7 +91,7 @@ A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developer
 - We have made all Voice-Pro code open source and completely free. Voice-Pro can now be freely distributed and modified by anyone.
 - It targets Linux with NVIDIA GPU.
 - Please leave your requests on the [![GitHub Issues](https://img.shields.io/github/issues/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/issues)  or  [![GitHub Discussions](https://img.shields.io/github/discussions/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/discussions) pages.
-- **Troubleshooting**: In most cases, issues can be resolved by deleting the `installer_files` folder and then running `configure.sh` followed by `start.sh`.
+- **Troubleshooting**: In most cases, issues can be resolved by deleting the `installer` folder and then running `configure.sh` followed by `start.sh`.
 
 
 ## 📰 News & History
@@ -443,7 +443,7 @@ git clone https://github.com/abus-aikorea/voice-pro.git
 2. 🚀 **start.sh**
    - Launches Voice-Pro WebUI
    - First run installs dependencies (1+ hour)
-   - Retry after deleting **installer_files** if issues arise
+   - Retry after deleting **installer** if issues arise
 
 ### 3. Update
 - 🚀 **update.sh**: Refreshes Python environment (faster than reinstall)

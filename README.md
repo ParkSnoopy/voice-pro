@@ -67,7 +67,7 @@ A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developer
 - We have made all Voice-Pro code open source and completely free. Voice-Pro can now be freely distributed and modified by anyone.
 - It targets Linux with NVIDIA GPU.
 - Please leave your requests on the [![GitHub Issues](https://img.shields.io/github/issues/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/issues)  or  [![GitHub Discussions](https://img.shields.io/github/discussions/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/discussions) pages.
-- **Troubleshooting**: In most cases, issues can be resolved by deleting the `installer_files` folder and then running `configure.sh` followed by `start.sh`.
+- **Troubleshooting**: In most cases, issues can be resolved by deleting the `installer` folder and then running `configure.sh` followed by `start.sh`.
 
 
 ## 📰 News & History
@@ -421,7 +421,7 @@ git clone https://github.com/abus-aikorea/voice-pro.git
 2. 🚀 **start.sh**
    - Launches Voice-Pro WebUI
    - First run installs dependencies (1+ hour)
-   - Retry after deleting **installer_files** if issues arise
+   - Retry after deleting **installer** if issues arise
 
 ### 3. Update
 - 🚀 **update.sh**: Refreshes Python environment (faster than reinstall)
@@ -437,19 +437,19 @@ Voice-Pro is fully portable: **all** runtime writes stay under the project direc
 ### Inside the project directory
 | Path | Purpose |
 |---|---|
-| `installer_files/env/` | Python venv (uv-managed). ~3GB. |
-| `installer_files/home/` | Process-local `HOME` for libraries that hard-code `~`. |
-| `installer_files/gradio/` | Gradio upload temp (`GRADIO_TEMP_DIR`). |
-| `installer_files/tmp/` | Python `tempfile` / `TMPDIR`. |
-| `installer_files/uv-cache/` | uv + pip download cache (`UV_CACHE_DIR` / `PIP_CACHE_DIR`). |
-| `installer_files/uv-python/` | uv-managed Python downloads (`UV_PYTHON_INSTALL_DIR`) if system Python 3.10 is missing. |
-| `installer_files/yt-dlp-cache/` | yt-dlp extractor cache (`cachedir`). |
-| `installer_files/matplotlib/` | matplotlib font/config cache (`MPLCONFIGDIR`). |
-| `installer_files/xdg-cache/` | Linux default cache redirect (`XDG_CACHE_HOME`) for libraries using platformdirs/appdirs. |
-| `installer_files/xdg-config/` | Linux default config redirect (`XDG_CONFIG_HOME`). |
-| `installer_files/xdg-data/` | Linux default data redirect (`XDG_DATA_HOME`). |
-| `installer_files/xdg-state/` | Linux default state redirect (`XDG_STATE_HOME`). |
-| `installer_files/numba-cache/` | numba compilation cache (`NUMBA_CACHE_DIR`). |
+| `installer/env/` | Python venv (uv-managed). ~3GB. |
+| `installer/home/` | Process-local `HOME` for libraries that hard-code `~`. |
+| `installer/gradio/` | Gradio upload temp (`GRADIO_TEMP_DIR`). |
+| `installer/tmp/` | Python `tempfile` / `TMPDIR`. |
+| `installer/uv-cache/` | uv + pip download cache (`UV_CACHE_DIR` / `PIP_CACHE_DIR`). |
+| `installer/uv-python/` | uv-managed Python downloads (`UV_PYTHON_INSTALL_DIR`) if system Python 3.10 is missing. |
+| `installer/yt-dlp-cache/` | yt-dlp extractor cache (`cachedir`). |
+| `installer/matplotlib/` | matplotlib font/config cache (`MPLCONFIGDIR`). |
+| `installer/xdg-cache/` | Linux default cache redirect (`XDG_CACHE_HOME`) for libraries using platformdirs/appdirs. |
+| `installer/xdg-config/` | Linux default config redirect (`XDG_CONFIG_HOME`). |
+| `installer/xdg-data/` | Linux default data redirect (`XDG_DATA_HOME`). |
+| `installer/xdg-state/` | Linux default state redirect (`XDG_STATE_HOME`). |
+| `installer/numba-cache/` | numba compilation cache (`NUMBA_CACHE_DIR`). |
 | `model/` | Downloaded ML models: Whisper, Demucs, MDX-Net, RVC, F5-TTS, CosyVoice, Kokoro, Edge-TTS, VAD, Vocos. ~15GB. |
 | `model/stanza/` | Stanza NLP models (`STANZA_RESOURCES_DIR`). |
 | `model/.hf_cache/` | HuggingFace hub/cache (`HF_HOME`, `HF_HUB_CACHE`, `HUGGINGFACE_HUB_CACHE`, `TRANSFORMERS_CACHE`). |
@@ -467,7 +467,7 @@ Voice-Pro is fully portable: **all** runtime writes stay under the project direc
 None. `configure.sh` installs system packages (git, ffmpeg, build-essential) via apt/yum/dnf/pacman — those go to system paths, but only when you explicitly run `configure.sh`.
 
 ### Uninstall
-Delete the project folder to remove all runtime data. `uninstall.sh` removes `installer_files/` and can optionally remove system packages, but it intentionally leaves `model/`, `workspace/`, `.env`, and the project folder for manual deletion.
+Delete the project folder to remove all runtime data. `uninstall.sh` removes `installer/` and can optionally remove system packages, but it intentionally leaves `model/`, `workspace/`, `.env`, and the project folder for manual deletion.
 
 
 ## ❓Tips & Tricks

@@ -27,7 +27,7 @@ if ! command -v uv &> /dev/null; then
 fi
 
 # Setup paths
-INSTALL_DIR="$SCRIPT_DIR/installer_files"
+INSTALL_DIR="$SCRIPT_DIR/installer"
 INSTALL_ENV_DIR="$INSTALL_DIR/env"
 
 # Set temp/cache directories before any uv/pip command runs

@@ -14,7 +14,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
 
 # Ask for confirmation
-echo "This will remove the installer_files folder."
+echo "This will remove the installer folder."
 read -p "Do you want to continue? (y/N): " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -45,12 +45,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     fi
 fi
 
-# Remove installer_files folder
-if [ -d "$SCRIPT_DIR/installer_files" ]; then
-    echo "Deleting installer_files folder..."
+# Remove installer folder
+if [ -d "$SCRIPT_DIR/installer" ]; then
+    echo "Deleting installer folder..."
     echo "Please wait a moment"
-    rm -rf "$SCRIPT_DIR/installer_files"
-    echo "installer_files folder deleted."
+    rm -rf "$SCRIPT_DIR/installer"
+    echo "installer folder deleted."
 fi
 
 echo ""
