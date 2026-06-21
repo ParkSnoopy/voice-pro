@@ -11,7 +11,10 @@
     license: LGPL
 -->
 
+> [!WARNING]
+> Not tested
 
+---
 
 <h1 align="center">
 Voice-Pro
@@ -48,34 +51,6 @@ Voice-Pro
 
 ## 🎙️ An AI-powered web application for speech recognition, translation, and dubbing
 
-
-<p>  
-  <a href="docs/README.kor.md">
-    <img src="https://flagcdn.com/16x12/kr.png" alt="South Korea Flag" style="vertical-align: middle;"> 한국어
-  </a> ∙ 
-  <a href="docs/README.eng.md">
-    <img src="https://flagcdn.com/16x12/us.png" alt="United Kingdom Flag" style="vertical-align: middle;"> English
-  </a> ∙ 
-  <a href="docs/README.zh.md">
-    <img src="https://flagcdn.com/16x12/cn.png" alt="China Flag" style="vertical-align: middle;"> 中文简体
-  </a> ∙ 
-  <a href="docs/README.tw.md">
-    <img src="https://flagcdn.com/16x12/tw.png" alt="Taiwan Flag" style="vertical-align: middle;"> 中文繁體
-  </a> ∙ 
-  <a href="docs/README.jpn.md">
-    <img src="https://flagcdn.com/16x12/jp.png" alt="Japan Flag" style="vertical-align: middle;"> 日本語
-  </a> ∙ 
-  <a href="docs/README.deu.md">
-    <img src="https://flagcdn.com/16x12/de.png" alt="Germany Flag" style="vertical-align: middle;"> Deutsch
-  </a> ∙ 
-  <a href="docs/README.spa.md">
-    <img src="https://flagcdn.com/16x12/es.png" alt="Spain Flag" style="vertical-align: middle;"> Español
-  </a> ∙ 
-  <a href="docs/README.por.md">
-    <img src="https://flagcdn.com/16x12/pt.png" alt="Portugal Flag" style="vertical-align: middle;"> Português
-  </a>
-</p>
-
 Voice-Pro is a state-of-the-art web app that transforms multimedia content creation. It integrates YouTube video downloading, voice separation, speech recognition, translation, and text-to-speech into a single, powerful tool for creators, researchers, and multilingual professionals.
 - 🔊 Top-tier speech recognition: **Whisper**, **Faster-Whisper**, **Whisper-Timestamped**, **WhisperX**
 - 🎤 Zero-shot voice cloning: **F5-TTS**, **E2-TTS**, **CosyVoice**
@@ -87,6 +62,7 @@ Voice-Pro is a state-of-the-art web app that transforms multimedia content creat
 A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developers, and creators with advanced voice solutions.
 
 ## ⚠️ Please Note
+
 - Due to [WeConnect](https://www.wctokyoseoul.com) development work, Voice-Pro development and updates are not possible for the time being.
 - We have made all Voice-Pro code open source and completely free. Voice-Pro can now be freely distributed and modified by anyone.
 - It targets Linux with NVIDIA GPU.
@@ -420,6 +396,7 @@ Japanese
 - **RAM:** 4GB+
 - **Storage:** 20GB+ free space
 - **Internet:** Required
+- **uv:** Install first — `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
 
 
@@ -451,6 +428,46 @@ git clone https://github.com/abus-aikorea/voice-pro.git
 
 ### 4. Uninstall
 - Run **uninstall.sh** or delete the folder (portable install)
+
+
+## 📁 Folders & Files Written
+
+Voice-Pro is fully portable: **all** runtime writes stay under the project directory. Nothing is written to `~/.cache/`, `~/.local/`, `~/.config/`, `~/.nv/`, `~/stanza_resources/`, or `/tmp/`. `start.sh`, `update.sh`, and `one_click.py` redirect cache/temp dirs with Linux env vars including `HOME`, `TMPDIR`, `XDG_*`, `GRADIO_TEMP_DIR`, `HF_*`, `MODELSCOPE_CACHE`, `UV_*`, `MPLCONFIGDIR`, `TORCH_*`, `CUDA_CACHE_PATH`, `NUMBA_CACHE_DIR`, `TRITON_CACHE_DIR`, and `CACHED_PATH_CACHE_DIR`.
+
+### Inside the project directory
+| Path | Purpose |
+|---|---|
+| `installer_files/env/` | Python venv (uv-managed). ~3GB. |
+| `installer_files/home/` | Process-local `HOME` for libraries that hard-code `~`. |
+| `installer_files/gradio/` | Gradio upload temp (`GRADIO_TEMP_DIR`). |
+| `installer_files/tmp/` | Python `tempfile` / `TMPDIR`. |
+| `installer_files/uv-cache/` | uv + pip download cache (`UV_CACHE_DIR` / `PIP_CACHE_DIR`). |
+| `installer_files/uv-python/` | uv-managed Python downloads (`UV_PYTHON_INSTALL_DIR`) if system Python 3.10 is missing. |
+| `installer_files/yt-dlp-cache/` | yt-dlp extractor cache (`cachedir`). |
+| `installer_files/matplotlib/` | matplotlib font/config cache (`MPLCONFIGDIR`). |
+| `installer_files/xdg-cache/` | Linux default cache redirect (`XDG_CACHE_HOME`) for libraries using platformdirs/appdirs. |
+| `installer_files/xdg-config/` | Linux default config redirect (`XDG_CONFIG_HOME`). |
+| `installer_files/xdg-data/` | Linux default data redirect (`XDG_DATA_HOME`). |
+| `installer_files/xdg-state/` | Linux default state redirect (`XDG_STATE_HOME`). |
+| `installer_files/numba-cache/` | numba compilation cache (`NUMBA_CACHE_DIR`). |
+| `model/` | Downloaded ML models: Whisper, Demucs, MDX-Net, RVC, F5-TTS, CosyVoice, Kokoro, Edge-TTS, VAD, Vocos. ~15GB. |
+| `model/stanza/` | Stanza NLP models (`STANZA_RESOURCES_DIR`). |
+| `model/.hf_cache/` | HuggingFace hub/cache (`HF_HOME`, `HF_HUB_CACHE`, `HUGGINGFACE_HUB_CACHE`, `TRANSFORMERS_CACHE`). |
+| `model/.modelscope_cache/` | ModelScope cache (`MODELSCOPE_CACHE`) — CosyVoice. |
+| `model/.torch/` | torch.hub checkpoint cache (`TORCH_HOME`) — demucs remote fallback. |
+| `model/.torch_extensions/` | torch JIT extension build dir (`TORCH_EXTENSIONS_DIR`). |
+| `model/.cached_path/` | cached-path library cache (`CACHED_PATH_CACHE_DIR`) — F5-TTS fallback. |
+| `model/.triton/` | Triton kernel cache (`TRITON_CACHE_DIR`). |
+| `model/.nv/ComputeCache/` | NVIDIA CUDA kernel cache (`CUDA_CACHE_PATH`). |
+| `workspace/` | User output: `youtube/`, `live/`, `translate/`, `dubbing/`, `demucs/` subfolders. |
+| `app/config-user.json5` | User settings (gitignored). |
+| `.env` | Azure credentials — user-created from `.env.example` (gitignored). |
+
+### Outside the project directory
+None. `configure.sh` installs system packages (git, ffmpeg, build-essential) via apt/yum/dnf/pacman — those go to system paths, but only when you explicitly run `configure.sh`.
+
+### Uninstall
+Delete the project folder to remove all runtime data. `uninstall.sh` removes `installer_files/` and can optionally remove system packages, but it intentionally leaves `model/`, `workspace/`, `.env`, and the project folder for manual deletion.
 
 
 ## ❓Tips & Tricks
