@@ -13,9 +13,9 @@ from matcha.cli import plot_spectrogram_to_numpy, process_text
 
 
 def validate_args(args):
-    assert (
-        args.text or args.file
-    ), "Either text or file must be provided Matcha-T(ea)TTS need sometext to whisk the waveforms."
+    assert args.text or args.file, (
+        "Either text or file must be provided Matcha-T(ea)TTS need sometext to whisk the waveforms."
+    )
     assert args.temperature >= 0, "Sampling temperature cannot be negative"
     assert args.speaking_rate >= 0, "Speaking rate must be greater than 0"
     return args
@@ -23,7 +23,9 @@ def validate_args(args):
 
 def write_wavs(model, inputs, output_dir, external_vocoder=None):
     if external_vocoder is None:
-        print("The provided model has the vocoder embedded in the graph.\nGenerating waveform directly")
+        print(
+            "The provided model has the vocoder embedded in the graph.\nGenerating waveform directly"
+        )
         t0 = perf_counter()
         wavs, wav_lengths = model.run(None, inputs)
         infer_secs = perf_counter() - t0
@@ -91,9 +93,13 @@ def main():
         type=str,
         help="ONNX model to use",
     )
-    parser.add_argument("--vocoder", type=str, default=None, help="Vocoder to use (defaults to None)")
+    parser.add_argument(
+        "--vocoder", type=str, default=None, help="Vocoder to use (defaults to None)"
+    )
     parser.add_argument("--text", type=str, default=None, help="Text to synthesize")
-    parser.add_argument("--file", type=str, default=None, help="Text file to synthesize")
+    parser.add_argument(
+        "--file", type=str, default=None, help="Text file to synthesize"
+    )
     parser.add_argument("--spk", type=int, default=None, help="Speaker ID")
     parser.add_argument(
         "--temperature",
@@ -107,7 +113,11 @@ def main():
         default=1.0,
         help="change the speaking rate, a higher value means slower speaking rate (default: 1.0)",
     )
-    parser.add_argument("--gpu", action="store_true", help="Use CPU for inference (default: use GPU if available)")
+    parser.add_argument(
+        "--gpu",
+        action="store_true",
+        help="Use CPU for inference (default: use GPU if available)",
+    )
     parser.add_argument(
         "--output-dir",
         type=str,
@@ -138,7 +148,9 @@ def main():
     # Pad
     x = torch.nn.utils.rnn.pad_sequence(x, batch_first=True)
     x = x.detach().cpu().numpy()
-    x_lengths = np.array([line["x_lengths"].item() for line in processed_lines], dtype=np.int64)
+    x_lengths = np.array(
+        [line["x_lengths"].item() for line in processed_lines], dtype=np.int64
+    )
     inputs = {
         "x": x,
         "x_lengths": x_lengths,

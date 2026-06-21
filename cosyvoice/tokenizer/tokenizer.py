@@ -162,7 +162,7 @@ TTS_Vocal_Token = {
     "TTS/CO": "TTS/CO",
     "TTS/CL": "TTS/CL",
     "TTS/H": "TTS/H",
-    **{f"TTS/SP{i:02d}": f"TTS/SP{i:02d}" for i in range(1, 14)}
+    **{f"TTS/SP{i:02d}": f"TTS/SP{i:02d}" for i in range(1, 14)},
 }
 
 
@@ -188,8 +188,12 @@ def get_encoding(name: str = "gpt2", num_languages: int = 99):
         "<|startofprev|>",
         "<|nospeech|>",
         "<|notimestamps|>",
-        *[f"<|SPECIAL_TOKEN_{i}|>" for i in range(1, 31)],        # register special tokens for ASR
-        *[f"<|{tts}|>" for tts in list(TTS_Vocal_Token.keys())],  # register special tokens for TTS
+        *[
+            f"<|SPECIAL_TOKEN_{i}|>" for i in range(1, 31)
+        ],  # register special tokens for ASR
+        *[
+            f"<|{tts}|>" for tts in list(TTS_Vocal_Token.keys())
+        ],  # register special tokens for TTS
         *[f"<|{i * 0.02:.2f}|>" for i in range(1501)],
     ]
 
@@ -238,22 +242,34 @@ def get_tokenizer(
     )
 
 
-class QwenTokenizer():
+class QwenTokenizer:
     def __init__(self, token_path, skip_special_tokens=True):
         super().__init__()
         # NOTE: non-chat model, all these special tokens keep randomly initialized.
         special_tokens = {
-            'eos_token': '<|endoftext|>',
-            'pad_token': '<|endoftext|>',
-            'additional_special_tokens': [
-                '<|im_start|>', '<|im_end|>', '<|endofprompt|>',
-                '[breath]', '<strong>', '</strong>', '[noise]',
-                '[laughter]', '[cough]', '[clucking]', '[accent]',
-                '[quick_breath]',
-                "<laughter>", "</laughter>",
-                "[hissing]", "[sigh]", "[vocalized-noise]",
-                "[lipsmack]", "[mn]"
-            ]
+            "eos_token": "<|endoftext|>",
+            "pad_token": "<|endoftext|>",
+            "additional_special_tokens": [
+                "<|im_start|>",
+                "<|im_end|>",
+                "<|endofprompt|>",
+                "[breath]",
+                "<strong>",
+                "</strong>",
+                "[noise]",
+                "[laughter]",
+                "[cough]",
+                "[clucking]",
+                "[accent]",
+                "[quick_breath]",
+                "<laughter>",
+                "</laughter>",
+                "[hissing]",
+                "[sigh]",
+                "[vocalized-noise]",
+                "[lipsmack]",
+                "[mn]",
+            ],
         }
         self.special_tokens = special_tokens
         self.tokenizer = AutoTokenizer.from_pretrained(token_path)
@@ -267,13 +283,12 @@ class QwenTokenizer():
 
     def decode(self, tokens):
         tokens = torch.tensor(tokens, dtype=torch.int64)
-        text = self.tokenizer.batch_decode([tokens], skip_special_tokens=self.skip_special_tokens)[0]
+        text = self.tokenizer.batch_decode(
+            [tokens], skip_special_tokens=self.skip_special_tokens
+        )[0]
         return text
 
 
 @lru_cache(maxsize=None)
-def get_qwen_tokenizer(
-    token_path: str,
-    skip_special_tokens: bool
-) -> QwenTokenizer:
+def get_qwen_tokenizer(token_path: str, skip_special_tokens: bool) -> QwenTokenizer:
     return QwenTokenizer(token_path=token_path, skip_special_tokens=skip_special_tokens)

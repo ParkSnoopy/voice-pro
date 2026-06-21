@@ -117,9 +117,17 @@ class Separator:
         self._name = model
         self._repo = repo
         self._load_model()
-        self.update_parameter(device=device, shifts=shifts, overlap=overlap, split=split,
-                              segment=segment, jobs=jobs, progress=progress, callback=callback,
-                              callback_arg=callback_arg)
+        self.update_parameter(
+            device=device,
+            shifts=shifts,
+            overlap=overlap,
+            split=split,
+            segment=segment,
+            jobs=jobs,
+            progress=progress,
+            callback=callback,
+            callback_arg=callback_arg,
+        )
 
     def update_parameter(
         self,
@@ -130,9 +138,7 @@ class Separator:
         segment: Optional[Union[int, _NotProvided]] = NotProvided,
         jobs: Union[int, _NotProvided] = NotProvided,
         progress: Union[bool, _NotProvided] = NotProvided,
-        callback: Optional[
-            Union[Callable[[dict], None], _NotProvided]
-        ] = NotProvided,
+        callback: Optional[Union[Callable[[dict], None], _NotProvided]] = NotProvided,
         callback_arg: Optional[Union[dict, _NotProvided]] = NotProvided,
     ):
         """
@@ -212,8 +218,9 @@ class Separator:
         wav = None
 
         try:
-            wav = AudioFile(track).read(streams=0, samplerate=self._samplerate,
-                                        channels=self._audio_channels)
+            wav = AudioFile(track).read(
+                streams=0, samplerate=self._samplerate, channels=self._audio_channels
+            )
         except FileNotFoundError:
             errors["ffmpeg"] = "FFmpeg is not installed."
         except subprocess.CalledProcessError:
@@ -268,20 +275,20 @@ class Separator:
         wav -= ref.mean()
         wav /= ref.std() + 1e-8
         out = apply_model(
-                self._model,
-                wav[None],
-                segment=self._segment,
-                shifts=self._shifts,
-                split=self._split,
-                overlap=self._overlap,
-                device=self._device,
-                num_workers=self._jobs,
-                callback=self._callback,
-                callback_arg=_replace_dict(
-                    self._callback_arg, ("audio_length", wav.shape[1])
-                ),
-                progress=self._progress,
-            )
+            self._model,
+            wav[None],
+            segment=self._segment,
+            shifts=self._shifts,
+            split=self._split,
+            overlap=self._overlap,
+            device=self._device,
+            num_workers=self._jobs,
+            callback=self._callback,
+            callback_arg=_replace_dict(
+                self._callback_arg, ("audio_length", wav.shape[1])
+            ),
+            progress=self._progress,
+        )
         if out is None:
             raise KeyboardInterrupt
         out *= ref.std() + 1e-8
@@ -335,7 +342,7 @@ def list_models(repo: Optional[Path] = None) -> Dict[str, Dict[str, Union[str, P
     """
     model_repo: ModelOnlyRepo
     if repo is None:
-        models = _parse_remote_files(REMOTE_ROOT / 'files.txt')
+        models = _parse_remote_files(REMOTE_ROOT / "files.txt")
         model_repo = RemoteRepo(models)
         bag_repo = BagOnlyRepo(REMOTE_ROOT, model_repo)
     else:
@@ -362,7 +369,7 @@ if __name__ == "__main__":
         split=args.split,
         segment=args.segment,
         jobs=args.jobs,
-        callback=print
+        callback=print,
     )
     out = args.out / args.name
     out.mkdir(parents=True, exist_ok=True)

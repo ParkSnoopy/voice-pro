@@ -8,14 +8,13 @@ import onnxruntime
 
 
 import structlog
+
 logger = structlog.get_logger()
 
 
-class VoiceActivityDetection():
-
+class VoiceActivityDetection:
     def __init__(self, force_onnx_cpu=True):
-        path = os.path.join(os.getcwd(), 'model', 'vad', 'silero_vad.onnx')
-
+        path = os.path.join(os.getcwd(), "model", "vad", "silero_vad.onnx")
 
         opts = onnxruntime.SessionOptions()
         opts.log_severity_level = 3
@@ -23,10 +22,17 @@ class VoiceActivityDetection():
         opts.inter_op_num_threads = 1
         opts.intra_op_num_threads = 1
 
-        if force_onnx_cpu and 'CPUExecutionProvider' in onnxruntime.get_available_providers():
-            self.session = onnxruntime.InferenceSession(path, providers=['CPUExecutionProvider'], sess_options=opts)
+        if (
+            force_onnx_cpu
+            and "CPUExecutionProvider" in onnxruntime.get_available_providers()
+        ):
+            self.session = onnxruntime.InferenceSession(
+                path, providers=["CPUExecutionProvider"], sess_options=opts
+            )
         else:
-            self.session = onnxruntime.InferenceSession(path, providers=['CUDAExecutionProvider'], sess_options=opts)
+            self.session = onnxruntime.InferenceSession(
+                path, providers=["CUDAExecutionProvider"], sess_options=opts
+            )
 
         self.reset_states()
         self.sample_rates = [8000, 16000]
@@ -43,16 +49,20 @@ class VoiceActivityDetection():
             sr = 16000
 
         if sr not in self.sample_rates:
-            raise ValueError(f"Supported sampling rates: {self.sample_rates} (or multiply of 16000)")
+            raise ValueError(
+                f"Supported sampling rates: {self.sample_rates} (or multiply of 16000)"
+            )
 
         if sr / x.shape[1] > 31.25:
-            raise ValueError(f"Input audio chunk is too short dim={x.dim()}, shape={x.shape}")
+            raise ValueError(
+                f"Input audio chunk is too short dim={x.dim()}, shape={x.shape}"
+            )
 
         return x, sr
 
     def reset_states(self, batch_size=1):
-        self._h = np.zeros((2, batch_size, 64)).astype('float32')
-        self._c = np.zeros((2, batch_size, 64)).astype('float32')
+        self._h = np.zeros((2, batch_size, 64)).astype("float32")
+        self._c = np.zeros((2, batch_size, 64)).astype("float32")
         self._last_sr = 0
         self._last_batch_size = 0
 
@@ -69,7 +79,12 @@ class VoiceActivityDetection():
             self.reset_states(batch_size)
 
         if sr in [8000, 16000]:
-            ort_inputs = {'input': x.numpy(), 'h': self._h, 'c': self._c, 'sr': np.array(sr, dtype='int64')}
+            ort_inputs = {
+                "input": x.numpy(),
+                "h": self._h,
+                "c": self._c,
+                "sr": np.array(sr, dtype="int64"),
+            }
             ort_outs = self.session.run(None, ort_inputs)
             out, self._h, self._c = ort_outs
         else:
@@ -87,11 +102,11 @@ class VoiceActivityDetection():
 
         if x.shape[1] % num_samples:
             pad_num = num_samples - (x.shape[1] % num_samples)
-            x = torch.nn.functional.pad(x, (0, pad_num), 'constant', value=0.0)
+            x = torch.nn.functional.pad(x, (0, pad_num), "constant", value=0.0)
 
         self.reset_states(x.shape[0])
         for i in range(0, x.shape[1], num_samples):
-            wavs_batch = x[:, i:i+num_samples]
+            wavs_batch = x[:, i : i + num_samples]
             out_chunk = self.__call__(wavs_batch, sr)
             outs.append(out_chunk)
 
@@ -99,7 +114,9 @@ class VoiceActivityDetection():
         return stacked.cpu()
 
     @staticmethod
-    def download(model_url="https://github.com/snakers4/silero-vad/blob/master/files/silero_vad.onnx"):
+    def download(
+        model_url="https://github.com/snakers4/silero-vad/blob/master/files/silero_vad.onnx",
+    ):
         target_dir = os.path.expanduser("~/.cache/whisper-live/")
 
         # Ensure the target directory exists

@@ -17,7 +17,14 @@ import torch.nn.functional as F
 from einops import pack, rearrange, repeat
 from cosyvoice.utils.common import mask_to_bias
 from cosyvoice.utils.mask import add_optional_chunk_mask
-from matcha.models.components.decoder import SinusoidalPosEmb, Block1D, ResnetBlock1D, Downsample1D, TimestepEmbedding, Upsample1D
+from matcha.models.components.decoder import (
+    SinusoidalPosEmb,
+    Block1D,
+    ResnetBlock1D,
+    Downsample1D,
+    TimestepEmbedding,
+    Upsample1D,
+)
 from matcha.models.components.transformer import BasicTransformerBlock
 
 
@@ -65,16 +72,23 @@ class CausalConv1d(torch.nn.Conv1d):
         dilation: int = 1,
         groups: int = 1,
         bias: bool = True,
-        padding_mode: str = 'zeros',
+        padding_mode: str = "zeros",
         device=None,
-        dtype=None
+        dtype=None,
     ) -> None:
-        super(CausalConv1d, self).__init__(in_channels, out_channels,
-                                           kernel_size, stride,
-                                           padding=0, dilation=dilation,
-                                           groups=groups, bias=bias,
-                                           padding_mode=padding_mode,
-                                           device=device, dtype=dtype)
+        super(CausalConv1d, self).__init__(
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride,
+            padding=0,
+            dilation=dilation,
+            groups=groups,
+            bias=bias,
+            padding_mode=padding_mode,
+            device=device,
+            dtype=dtype,
+        )
         assert stride == 1
         self.causal_padding = (kernel_size - 1, 0)
 
@@ -123,8 +137,19 @@ class ConditionalDecoder(nn.Module):
             input_channel = output_channel
             output_channel = channels[i]
             is_last = i == len(channels) - 1
-            resnet = CausalResnetBlock1D(dim=input_channel, dim_out=output_channel, time_emb_dim=time_embed_dim) if self.causal else \
-                ResnetBlock1D(dim=input_channel, dim_out=output_channel, time_emb_dim=time_embed_dim)
+            resnet = (
+                CausalResnetBlock1D(
+                    dim=input_channel,
+                    dim_out=output_channel,
+                    time_emb_dim=time_embed_dim,
+                )
+                if self.causal
+                else ResnetBlock1D(
+                    dim=input_channel,
+                    dim_out=output_channel,
+                    time_emb_dim=time_embed_dim,
+                )
+            )
             transformer_blocks = nn.ModuleList(
                 [
                     BasicTransformerBlock(
@@ -138,16 +163,32 @@ class ConditionalDecoder(nn.Module):
                 ]
             )
             downsample = (
-                Downsample1D(output_channel) if not is_last else
-                CausalConv1d(output_channel, output_channel, 3) if self.causal else nn.Conv1d(output_channel, output_channel, 3, padding=1)
+                Downsample1D(output_channel)
+                if not is_last
+                else CausalConv1d(output_channel, output_channel, 3)
+                if self.causal
+                else nn.Conv1d(output_channel, output_channel, 3, padding=1)
             )
-            self.down_blocks.append(nn.ModuleList([resnet, transformer_blocks, downsample]))
+            self.down_blocks.append(
+                nn.ModuleList([resnet, transformer_blocks, downsample])
+            )
 
         for _ in range(num_mid_blocks):
             input_channel = channels[-1]
             out_channels = channels[-1]
-            resnet = CausalResnetBlock1D(dim=input_channel, dim_out=output_channel, time_emb_dim=time_embed_dim) if self.causal else \
-                ResnetBlock1D(dim=input_channel, dim_out=output_channel, time_emb_dim=time_embed_dim)
+            resnet = (
+                CausalResnetBlock1D(
+                    dim=input_channel,
+                    dim_out=output_channel,
+                    time_emb_dim=time_embed_dim,
+                )
+                if self.causal
+                else ResnetBlock1D(
+                    dim=input_channel,
+                    dim_out=output_channel,
+                    time_emb_dim=time_embed_dim,
+                )
+            )
 
             transformer_blocks = nn.ModuleList(
                 [
@@ -169,14 +210,18 @@ class ConditionalDecoder(nn.Module):
             input_channel = channels[i] * 2
             output_channel = channels[i + 1]
             is_last = i == len(channels) - 2
-            resnet = CausalResnetBlock1D(
-                dim=input_channel,
-                dim_out=output_channel,
-                time_emb_dim=time_embed_dim,
-            ) if self.causal else ResnetBlock1D(
-                dim=input_channel,
-                dim_out=output_channel,
-                time_emb_dim=time_embed_dim,
+            resnet = (
+                CausalResnetBlock1D(
+                    dim=input_channel,
+                    dim_out=output_channel,
+                    time_emb_dim=time_embed_dim,
+                )
+                if self.causal
+                else ResnetBlock1D(
+                    dim=input_channel,
+                    dim_out=output_channel,
+                    time_emb_dim=time_embed_dim,
+                )
             )
             transformer_blocks = nn.ModuleList(
                 [
@@ -193,10 +238,16 @@ class ConditionalDecoder(nn.Module):
             upsample = (
                 Upsample1D(output_channel, use_conv_transpose=True)
                 if not is_last
-                else CausalConv1d(output_channel, output_channel, 3) if self.causal else nn.Conv1d(output_channel, output_channel, 3, padding=1)
+                else CausalConv1d(output_channel, output_channel, 3)
+                if self.causal
+                else nn.Conv1d(output_channel, output_channel, 3, padding=1)
             )
             self.up_blocks.append(nn.ModuleList([resnet, transformer_blocks, upsample]))
-        self.final_block = CausalBlock1D(channels[-1], channels[-1]) if self.causal else Block1D(channels[-1], channels[-1])
+        self.final_block = (
+            CausalBlock1D(channels[-1], channels[-1])
+            if self.causal
+            else Block1D(channels[-1], channels[-1])
+        )
         self.final_proj = nn.Conv1d(channels[-1], self.out_channels, 1)
         self.initialize_weights()
 
@@ -250,7 +301,9 @@ class ConditionalDecoder(nn.Module):
             x = resnet(x, mask_down, t)
             x = rearrange(x, "b c t -> b t c").contiguous()
             # attn_mask = torch.matmul(mask_down.transpose(1, 2).contiguous(), mask_down)
-            attn_mask = add_optional_chunk_mask(x, mask_down.bool(), False, False, 0, self.static_chunk_size, -1)
+            attn_mask = add_optional_chunk_mask(
+                x, mask_down.bool(), False, False, 0, self.static_chunk_size, -1
+            )
             attn_mask = mask_to_bias(attn_mask == 1, x.dtype)
             for transformer_block in transformer_blocks:
                 x = transformer_block(
@@ -269,7 +322,9 @@ class ConditionalDecoder(nn.Module):
             x = resnet(x, mask_mid, t)
             x = rearrange(x, "b c t -> b t c").contiguous()
             # attn_mask = torch.matmul(mask_mid.transpose(1, 2).contiguous(), mask_mid)
-            attn_mask = add_optional_chunk_mask(x, mask_mid.bool(), False, False, 0, self.static_chunk_size, -1)
+            attn_mask = add_optional_chunk_mask(
+                x, mask_mid.bool(), False, False, 0, self.static_chunk_size, -1
+            )
             attn_mask = mask_to_bias(attn_mask == 1, x.dtype)
             for transformer_block in transformer_blocks:
                 x = transformer_block(
@@ -282,11 +337,13 @@ class ConditionalDecoder(nn.Module):
         for resnet, transformer_blocks, upsample in self.up_blocks:
             mask_up = masks.pop()
             skip = hiddens.pop()
-            x = pack([x[:, :, :skip.shape[-1]], skip], "b * t")[0]
+            x = pack([x[:, :, : skip.shape[-1]], skip], "b * t")[0]
             x = resnet(x, mask_up, t)
             x = rearrange(x, "b c t -> b t c").contiguous()
             # attn_mask = torch.matmul(mask_up.transpose(1, 2).contiguous(), mask_up)
-            attn_mask = add_optional_chunk_mask(x, mask_up.bool(), False, False, 0, self.static_chunk_size, -1)
+            attn_mask = add_optional_chunk_mask(
+                x, mask_up.bool(), False, False, 0, self.static_chunk_size, -1
+            )
             attn_mask = mask_to_bias(attn_mask == 1, x.dtype)
             for transformer_block in transformer_blocks:
                 x = transformer_block(

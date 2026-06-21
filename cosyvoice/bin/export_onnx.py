@@ -17,35 +17,45 @@ from __future__ import print_function
 
 import argparse
 import logging
-logging.getLogger('matplotlib').setLevel(logging.WARNING)
+
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
 import os
 import sys
 import onnxruntime
 import random
 import torch
 from tqdm import tqdm
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append('{}/../..'.format(ROOT_DIR))
-sys.path.append('{}/../../third_party/Matcha-TTS'.format(ROOT_DIR))
+sys.path.append("{}/../..".format(ROOT_DIR))
+sys.path.append("{}/../../third_party/Matcha-TTS".format(ROOT_DIR))
 from cosyvoice.cli.cosyvoice import CosyVoice, CosyVoice2
 
 
 def get_dummy_input(batch_size, seq_len, out_channels, device):
-    x = torch.rand((batch_size, out_channels, seq_len), dtype=torch.float32, device=device)
+    x = torch.rand(
+        (batch_size, out_channels, seq_len), dtype=torch.float32, device=device
+    )
     mask = torch.ones((batch_size, 1, seq_len), dtype=torch.float32, device=device)
-    mu = torch.rand((batch_size, out_channels, seq_len), dtype=torch.float32, device=device)
+    mu = torch.rand(
+        (batch_size, out_channels, seq_len), dtype=torch.float32, device=device
+    )
     t = torch.rand((batch_size), dtype=torch.float32, device=device)
     spks = torch.rand((batch_size, out_channels), dtype=torch.float32, device=device)
-    cond = torch.rand((batch_size, out_channels, seq_len), dtype=torch.float32, device=device)
+    cond = torch.rand(
+        (batch_size, out_channels, seq_len), dtype=torch.float32, device=device
+    )
     return x, mask, mu, t, spks, cond
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='export your model for deployment')
-    parser.add_argument('--model_dir',
-                        type=str,
-                        default='pretrained_models/CosyVoice-300M',
-                        help='local path')
+    parser = argparse.ArgumentParser(description="export your model for deployment")
+    parser.add_argument(
+        "--model_dir",
+        type=str,
+        default="pretrained_models/CosyVoice-300M",
+        help="local path",
+    )
     args = parser.parse_args()
     print(args)
     return args
@@ -53,8 +63,9 @@ def get_args():
 
 def main():
     args = get_args()
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s %(levelname)s %(message)s')
+    logging.basicConfig(
+        level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s"
+    )
 
     try:
         model = CosyVoice(args.model_dir)
@@ -62,7 +73,7 @@ def main():
         try:
             model = CosyVoice2(args.model_dir)
         except Exception:
-            raise TypeError('no valid model_type!')
+            raise TypeError("no valid model_type!")
 
     # 1. export flow decoder estimator
     estimator = model.model.flow.decoder.estimator
@@ -70,46 +81,60 @@ def main():
     device = model.model.device
     batch_size, seq_len = 2, 256
     out_channels = model.model.flow.decoder.estimator.out_channels
-    x, mask, mu, t, spks, cond = get_dummy_input(batch_size, seq_len, out_channels, device)
+    x, mask, mu, t, spks, cond = get_dummy_input(
+        batch_size, seq_len, out_channels, device
+    )
     torch.onnx.export(
         estimator,
         (x, mask, mu, t, spks, cond),
-        '{}/flow.decoder.estimator.fp32.onnx'.format(args.model_dir),
+        "{}/flow.decoder.estimator.fp32.onnx".format(args.model_dir),
         export_params=True,
         opset_version=18,
         do_constant_folding=True,
-        input_names=['x', 'mask', 'mu', 't', 'spks', 'cond'],
-        output_names=['estimator_out'],
+        input_names=["x", "mask", "mu", "t", "spks", "cond"],
+        output_names=["estimator_out"],
         dynamic_axes={
-            'x': {2: 'seq_len'},
-            'mask': {2: 'seq_len'},
-            'mu': {2: 'seq_len'},
-            'cond': {2: 'seq_len'},
-            'estimator_out': {2: 'seq_len'},
-        }
+            "x": {2: "seq_len"},
+            "mask": {2: "seq_len"},
+            "mu": {2: "seq_len"},
+            "cond": {2: "seq_len"},
+            "estimator_out": {2: "seq_len"},
+        },
     )
 
     # 2. test computation consistency
     option = onnxruntime.SessionOptions()
     option.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
     option.intra_op_num_threads = 1
-    providers = ['CUDAExecutionProvider' if torch.cuda.is_available() else 'CPUExecutionProvider']
-    estimator_onnx = onnxruntime.InferenceSession('{}/flow.decoder.estimator.fp32.onnx'.format(args.model_dir),
-                                                  sess_options=option, providers=providers)
+    providers = [
+        "CUDAExecutionProvider" if torch.cuda.is_available() else "CPUExecutionProvider"
+    ]
+    estimator_onnx = onnxruntime.InferenceSession(
+        "{}/flow.decoder.estimator.fp32.onnx".format(args.model_dir),
+        sess_options=option,
+        providers=providers,
+    )
 
     for _ in tqdm(range(10)):
-        x, mask, mu, t, spks, cond = get_dummy_input(batch_size, random.randint(16, 512), out_channels, device)
+        x, mask, mu, t, spks, cond = get_dummy_input(
+            batch_size, random.randint(16, 512), out_channels, device
+        )
         output_pytorch = estimator(x, mask, mu, t, spks, cond)
         ort_inputs = {
-            'x': x.cpu().numpy(),
-            'mask': mask.cpu().numpy(),
-            'mu': mu.cpu().numpy(),
-            't': t.cpu().numpy(),
-            'spks': spks.cpu().numpy(),
-            'cond': cond.cpu().numpy()
+            "x": x.cpu().numpy(),
+            "mask": mask.cpu().numpy(),
+            "mu": mu.cpu().numpy(),
+            "t": t.cpu().numpy(),
+            "spks": spks.cpu().numpy(),
+            "cond": cond.cpu().numpy(),
         }
         output_onnx = estimator_onnx.run(None, ort_inputs)[0]
-        torch.testing.assert_allclose(output_pytorch, torch.from_numpy(output_onnx).to(device), rtol=1e-2, atol=1e-4)
+        torch.testing.assert_allclose(
+            output_pytorch,
+            torch.from_numpy(output_onnx).to(device),
+            rtol=1e-2,
+            atol=1e-4,
+        )
 
 
 if __name__ == "__main__":

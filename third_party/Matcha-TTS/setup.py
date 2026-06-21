@@ -28,7 +28,10 @@ setup(
     author="Shivam Mehta",
     author_email="shivam.mehta25@gmail.com",
     url="https://shivammehta25.github.io/Matcha-TTS",
-    install_requires=[str(r) for r in open(os.path.join(os.path.dirname(__file__), "requirements.txt"))],
+    install_requires=[
+        str(r)
+        for r in open(os.path.join(os.path.dirname(__file__), "requirements.txt"))
+    ],
     include_dirs=[numpy.get_include()],
     include_package_data=True,
     packages=find_packages(exclude=["tests", "tests/*", "examples", "examples/*"]),

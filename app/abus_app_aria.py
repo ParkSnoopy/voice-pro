@@ -1,7 +1,5 @@
 import os
 import sys
-from pathlib import Path
-import random
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -14,6 +12,7 @@ from src.config import UserConfig
 
 import src.ui as ui
 from src.i18n.i18n import I18nAuto
+
 i18n = I18nAuto()
 
 import structlog
@@ -27,23 +26,24 @@ structlog.configure(
 logger = structlog.get_logger()
 
 
-from app.abus_genuine import *  
+from app.abus_genuine import *
 from app.tab_aicover import aicover_tab
 from app.tab_demixing import demixing_tab
 
 
 ##############################################################################################
 # Gradio
-##############################################################################################    
+##############################################################################################
+
 
 def create_ui(user_config: UserConfig):
     # css/js strings
     css = ui.css
     js = ui.js
 
-    with gr.Blocks(title='Aria CoverSong', css=css, theme=ui.theme) as gradio_interface:
-        gr.HTML(f'<center><h6>{i18n("")}</h6></center>')
-        
+    with gr.Blocks(title="Aria CoverSong", css=css, theme=ui.theme) as gradio_interface:
+        gr.HTML(f"<center><h6>{i18n('')}</h6></center>")
+
         with gr.Tab(i18n("AI Cover")):
             aicover_tab(user_config)
 
@@ -51,33 +51,36 @@ def create_ui(user_config: UserConfig):
             demixing_tab(user_config)
 
         create_app_footer()
-                        
-        gradio_interface.load(None, None, None, js="() => document.getElementsByTagName('body')[0].classList.add('dark')")
+
+        gradio_interface.load(
+            None,
+            None,
+            None,
+            js="() => document.getElementsByTagName('body')[0].classList.add('dark')",
+        )
         gradio_interface.load(None, None, None, js=f"() => {{{js}}}")
-                    
-        
+
     gradio_interface.launch(
-        share=False,
-        server_name=None, 
-        server_port=7910,
-        inbrowser=True
+        share=False, server_name=None, server_port=7910, inbrowser=True
     )
+
 
 def create_app_footer():
     gradio_version = gr.__version__
     python_version = platform.python_version()
     torch_version = torch.__version__
 
-    footer_items = ["🔊 [aria-coversong](https://github.com/abus-aikorea/aria-coversong)"]
+    footer_items = [
+        "🔊 [aria-coversong](https://github.com/abus-aikorea/aria-coversong)"
+    ]
     footer_items.append(f"python: `{python_version}`")
     footer_items.append(f"torch: `{torch_version}`")
     footer_items.append(f"gradio: `{gradio_version}`")
 
     genuine = "activated version"
     footer_items.append(f"{genuine}")
-    
+
     gr.Markdown(
         " | ".join(footer_items),
         elem_classes=["no-translate"],
     )
-

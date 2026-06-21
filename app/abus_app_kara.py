@@ -1,7 +1,5 @@
 import os
 import sys
-from pathlib import Path
-import random
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -14,6 +12,7 @@ from src.config import UserConfig
 
 import src.ui as ui
 from src.i18n.i18n import I18nAuto
+
 i18n = I18nAuto()
 
 import structlog
@@ -30,7 +29,6 @@ structlog.configure(
 logger = structlog.get_logger()
 
 
-
 from app.abus_genuine import *
 from app.tab_karaoke import karaoke_tab
 from app.tab_demixing import demixing_tab
@@ -39,7 +37,7 @@ from app.tab_subtitle import subtitle_tab
 
 ##############################################################################################
 # Gradio
-##############################################################################################    
+##############################################################################################
 
 
 def create_ui(user_config: UserConfig):
@@ -47,30 +45,32 @@ def create_ui(user_config: UserConfig):
     css = ui.css
     js = ui.js
 
-    with gr.Blocks(title='Kara Audio', css=css, theme=ui.theme) as gradio_interface:
-        gr.HTML(f'<center><h6>{i18n("")}</h6></center>')
-        
+    with gr.Blocks(title="Kara Audio", css=css, theme=ui.theme) as gradio_interface:
+        gr.HTML(f"<center><h6>{i18n('')}</h6></center>")
+
         with gr.Tab(i18n("Kara Audio")):
             karaoke_tab(user_config)
-                    
+
         with gr.Tab(i18n("Demixing")):
             demixing_tab(user_config)
 
         with gr.Tab(i18n("Subtitle")):
             subtitle_tab(user_config)
-            
-        create_app_footer()    
-            
-        gradio_interface.load(None, None, None, js="() => document.getElementsByTagName('body')[0].classList.add('dark')")
+
+        create_app_footer()
+
+        gradio_interface.load(
+            None,
+            None,
+            None,
+            js="() => document.getElementsByTagName('body')[0].classList.add('dark')",
+        )
         gradio_interface.load(None, None, None, js=f"() => {{{js}}}")
-                    
-     
+
     gradio_interface.launch(
-        share=False,
-        server_name=None, 
-        server_port=7890,
-        inbrowser=True
+        share=False, server_name=None, server_port=7890, inbrowser=True
     )
+
 
 def create_app_footer():
     gradio_version = gr.__version__
@@ -84,7 +84,7 @@ def create_app_footer():
 
     genuine = "activated version"
     footer_items.append(f"{genuine}")
-    
+
     gr.Markdown(
         " | ".join(footer_items),
         elem_classes=["no-translate"],

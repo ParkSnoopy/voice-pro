@@ -7,16 +7,16 @@ from torchaudio.transforms import Spectrogram
 
 
 class MultipleDiscriminator(nn.Module):
-    def __init__(
-            self, mpd: nn.Module, mrd: nn.Module
-    ):
+    def __init__(self, mpd: nn.Module, mrd: nn.Module):
         super().__init__()
         self.mpd = mpd
         self.mrd = mrd
 
     def forward(self, y: torch.Tensor, y_hat: torch.Tensor):
         y_d_rs, y_d_gs, fmap_rs, fmap_gs = [], [], [], []
-        this_y_d_rs, this_y_d_gs, this_fmap_rs, this_fmap_gs = self.mpd(y.unsqueeze(dim=1), y_hat.unsqueeze(dim=1))
+        this_y_d_rs, this_y_d_gs, this_fmap_rs, this_fmap_gs = self.mpd(
+            y.unsqueeze(dim=1), y_hat.unsqueeze(dim=1)
+        )
         y_d_rs += this_y_d_rs
         y_d_gs += this_y_d_gs
         fmap_rs += this_fmap_rs
@@ -47,12 +47,20 @@ class MultiResolutionDiscriminator(nn.Module):
 
         super().__init__()
         self.discriminators = nn.ModuleList(
-            [DiscriminatorR(window_length=w, num_embeddings=num_embeddings) for w in fft_sizes]
+            [
+                DiscriminatorR(window_length=w, num_embeddings=num_embeddings)
+                for w in fft_sizes
+            ]
         )
 
     def forward(
         self, y: torch.Tensor, y_hat: torch.Tensor, bandwidth_id: torch.Tensor = None
-    ) -> Tuple[List[torch.Tensor], List[torch.Tensor], List[List[torch.Tensor]], List[List[torch.Tensor]]]:
+    ) -> Tuple[
+        List[torch.Tensor],
+        List[torch.Tensor],
+        List[List[torch.Tensor]],
+        List[List[torch.Tensor]],
+    ]:
         y_d_rs = []
         y_d_gs = []
         fmap_rs = []
@@ -76,13 +84,22 @@ class DiscriminatorR(nn.Module):
         num_embeddings: Optional[int] = None,
         channels: int = 32,
         hop_factor: float = 0.25,
-        bands: Tuple[Tuple[float, float], ...] = ((0.0, 0.1), (0.1, 0.25), (0.25, 0.5), (0.5, 0.75), (0.75, 1.0)),
+        bands: Tuple[Tuple[float, float], ...] = (
+            (0.0, 0.1),
+            (0.1, 0.25),
+            (0.25, 0.5),
+            (0.5, 0.75),
+            (0.75, 1.0),
+        ),
     ):
         super().__init__()
         self.window_length = window_length
         self.hop_factor = hop_factor
         self.spec_fn = Spectrogram(
-            n_fft=window_length, hop_length=int(window_length * hop_factor), win_length=window_length, power=None
+            n_fft=window_length,
+            hop_length=int(window_length * hop_factor),
+            win_length=window_length,
+            power=None,
         )
         n_fft = window_length // 2 + 1
         bands = [(int(b[0] * n_fft), int(b[1] * n_fft)) for b in bands]
@@ -90,19 +107,31 @@ class DiscriminatorR(nn.Module):
         convs = lambda: nn.ModuleList(
             [
                 weight_norm(nn.Conv2d(2, channels, (3, 9), (1, 1), padding=(1, 4))),
-                weight_norm(nn.Conv2d(channels, channels, (3, 9), (1, 2), padding=(1, 4))),
-                weight_norm(nn.Conv2d(channels, channels, (3, 9), (1, 2), padding=(1, 4))),
-                weight_norm(nn.Conv2d(channels, channels, (3, 9), (1, 2), padding=(1, 4))),
-                weight_norm(nn.Conv2d(channels, channels, (3, 3), (1, 1), padding=(1, 1))),
+                weight_norm(
+                    nn.Conv2d(channels, channels, (3, 9), (1, 2), padding=(1, 4))
+                ),
+                weight_norm(
+                    nn.Conv2d(channels, channels, (3, 9), (1, 2), padding=(1, 4))
+                ),
+                weight_norm(
+                    nn.Conv2d(channels, channels, (3, 9), (1, 2), padding=(1, 4))
+                ),
+                weight_norm(
+                    nn.Conv2d(channels, channels, (3, 3), (1, 1), padding=(1, 1))
+                ),
             ]
         )
         self.band_convs = nn.ModuleList([convs() for _ in range(len(self.bands))])
 
         if num_embeddings is not None:
-            self.emb = torch.nn.Embedding(num_embeddings=num_embeddings, embedding_dim=channels)
+            self.emb = torch.nn.Embedding(
+                num_embeddings=num_embeddings, embedding_dim=channels
+            )
             torch.nn.init.zeros_(self.emb.weight)
 
-        self.conv_post = weight_norm(nn.Conv2d(channels, 1, (3, 3), (1, 1), padding=(1, 1)))
+        self.conv_post = weight_norm(
+            nn.Conv2d(channels, 1, (3, 3), (1, 1), padding=(1, 1))
+        )
 
     def spectrogram(self, x):
         # Remove DC offset
@@ -113,7 +142,7 @@ class DiscriminatorR(nn.Module):
         x = torch.view_as_real(x)
         x = rearrange(x, "b f t c -> b c t f")
         # Split into bands
-        x_bands = [x[..., b[0]: b[1]] for b in self.bands]
+        x_bands = [x[..., b[0] : b[1]] for b in self.bands]
         return x_bands
 
     def forward(self, x: torch.Tensor, cond_embedding_id: torch.Tensor = None):

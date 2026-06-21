@@ -24,5 +24,9 @@ v1 = {
     "fmax": 8000,
     "fmax_loss": None,
     "num_workers": 4,
-    "dist_config": {"dist_backend": "nccl", "dist_url": "tcp://localhost:54321", "world_size": 1},
+    "dist_config": {
+        "dist_backend": "nccl",
+        "dist_url": "tcp://localhost:54321",
+        "world_size": 1,
+    },
 }

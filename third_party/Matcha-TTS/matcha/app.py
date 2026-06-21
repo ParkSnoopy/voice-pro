@@ -51,7 +51,9 @@ RADIO_OPTIONS = {
 }
 
 # Ensure all the required models are downloaded
-assert_model_downloaded(MATCHA_TTS_LOC("matcha_ljspeech"), MATCHA_URLS["matcha_ljspeech"])
+assert_model_downloaded(
+    MATCHA_TTS_LOC("matcha_ljspeech"), MATCHA_URLS["matcha_ljspeech"]
+)
 assert_model_downloaded(VOCODER_LOC("hifigan_T2_v1"), VOCODER_URLS["hifigan_T2_v1"])
 assert_model_downloaded(MATCHA_TTS_LOC("matcha_vctk"), MATCHA_URLS["matcha_vctk"])
 assert_model_downloaded(VOCODER_LOC("hifigan_univ_v1"), VOCODER_URLS["hifigan_univ_v1"])
@@ -70,7 +72,10 @@ def load_model(model_name, vocoder_name):
 
 
 def load_model_ui(model_type, textbox):
-    model_name, vocoder_name = RADIO_OPTIONS[model_type]["model"], RADIO_OPTIONS[model_type]["vocoder"]
+    model_name, vocoder_name = (
+        RADIO_OPTIONS[model_type]["model"],
+        RADIO_OPTIONS[model_type]["vocoder"],
+    )
 
     global model, vocoder, denoiser, CURRENTLY_LOADED_MODEL  # pylint: disable=global-statement
     if CURRENTLY_LOADED_MODEL != model_name:
@@ -130,7 +135,9 @@ def multispeaker_example_cacher(text, n_timesteps, mel_temp, length_scale, spk):
         CURRENTLY_LOADED_MODEL = "matcha_vctk"
 
     phones, text, text_lengths = process_text_gradio(text)
-    audio, mel_spectrogram = synthesise_mel(text, text_lengths, n_timesteps, mel_temp, length_scale, spk)
+    audio, mel_spectrogram = synthesise_mel(
+        text, text_lengths, n_timesteps, mel_temp, length_scale, spk
+    )
     return phones, audio, mel_spectrogram
 
 
@@ -142,7 +149,9 @@ def ljspeech_example_cacher(text, n_timesteps, mel_temp, length_scale, spk=-1):
         CURRENTLY_LOADED_MODEL = "matcha_ljspeech"
 
     phones, text, text_lengths = process_text_gradio(text)
-    audio, mel_spectrogram = synthesise_mel(text, text_lengths, n_timesteps, mel_temp, length_scale, spk)
+    audio, mel_spectrogram = synthesise_mel(
+        text, text_lengths, n_timesteps, mel_temp, length_scale, spk
+    )
     return phones, audio, mel_spectrogram
 
 
@@ -164,7 +173,9 @@ def main():
     Cached examples are available at the bottom of the page.
     """
 
-    with gr.Blocks(title="🍵 Matcha-TTS: A fast TTS architecture with conditional flow matching") as demo:
+    with gr.Blocks(
+        title="🍵 Matcha-TTS: A fast TTS architecture with conditional flow matching"
+    ) as demo:
         processed_text = gr.State(value=None)
         processed_text_len = gr.State(value=None)
 
@@ -172,22 +183,41 @@ def main():
             with gr.Row():
                 gr.Markdown(description, scale=3)
                 with gr.Column():
-                    gr.Image(LOGO_URL, label="Matcha-TTS logo", height=50, width=50, scale=1, show_label=False)
+                    gr.Image(
+                        LOGO_URL,
+                        label="Matcha-TTS logo",
+                        height=50,
+                        width=50,
+                        scale=1,
+                        show_label=False,
+                    )
                     html = '<br><iframe width="560" height="315" src="https://www.youtube.com/embed/xmvJkz3bqw0?si=jN7ILyDsbPwJCGoa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
                     gr.HTML(html)
 
         with gr.Box():
             radio_options = list(RADIO_OPTIONS.keys())
             model_type = gr.Radio(
-                radio_options, value=radio_options[0], label="Choose a Model", interactive=True, container=False
+                radio_options,
+                value=radio_options[0],
+                label="Choose a Model",
+                interactive=True,
+                container=False,
             )
 
             with gr.Row():
                 gr.Markdown("# Text Input")
             with gr.Row():
-                text = gr.Textbox(value="", lines=2, label="Text to synthesise", scale=3)
+                text = gr.Textbox(
+                    value="", lines=2, label="Text to synthesise", scale=3
+                )
                 spk_slider = gr.Slider(
-                    minimum=0, maximum=107, step=1, value=args.spk, label="Speaker ID", interactive=True, scale=1
+                    minimum=0,
+                    maximum=107,
+                    step=1,
+                    value=args.spk,
+                    label="Speaker ID",
+                    interactive=True,
+                    scale=1,
                 )
 
             with gr.Row():
@@ -223,7 +253,9 @@ def main():
         with gr.Box():
             with gr.Row():
                 gr.Markdown("### Phonetised text")
-                phonetised_text = gr.Textbox(interactive=False, scale=10, label="Phonetised text")
+                phonetised_text = gr.Textbox(
+                    interactive=False, scale=10, label="Phonetised text"
+                )
 
         with gr.Box():
             with gr.Row():
@@ -330,10 +362,21 @@ def main():
                 label="Multi Speaker Examples",
             )
 
-        model_type.change(lambda x: gr.update(interactive=False), inputs=[synth_btn], outputs=[synth_btn]).then(
+        model_type.change(
+            lambda x: gr.update(interactive=False),
+            inputs=[synth_btn],
+            outputs=[synth_btn],
+        ).then(
             load_model_ui,
             inputs=[model_type, text],
-            outputs=[text, synth_btn, spk_slider, example_row_lj_speech, example_row_multispeaker, length_scale],
+            outputs=[
+                text,
+                synth_btn,
+                spk_slider,
+                example_row_lj_speech,
+                example_row_multispeaker,
+                length_scale,
+            ],
         )
 
         synth_btn.click(
@@ -346,7 +389,14 @@ def main():
             queue=True,
         ).then(
             fn=synthesise_mel,
-            inputs=[processed_text, processed_text_len, n_timesteps, mel_temp, length_scale, spk_slider],
+            inputs=[
+                processed_text,
+                processed_text_len,
+                n_timesteps,
+                mel_temp,
+                length_scale,
+                spk_slider,
+            ],
             outputs=[audio, mel_spectrogram],
         )
 

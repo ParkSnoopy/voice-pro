@@ -16,14 +16,16 @@
 import json
 import torchaudio
 import logging
-logging.getLogger('matplotlib').setLevel(logging.WARNING)
-logging.basicConfig(level=logging.WARNING,
-                    format='%(asctime)s %(levelname)s %(message)s')
+
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logging.basicConfig(
+    level=logging.WARNING, format="%(asctime)s %(levelname)s %(message)s"
+)
 
 
 def read_lists(list_file):
     lists = []
-    with open(list_file, 'r', encoding='utf8') as fin:
+    with open(list_file, "r", encoding="utf8") as fin:
         for line in fin:
             lists.append(line.strip())
     return lists
@@ -33,25 +35,37 @@ def read_json_lists(list_file):
     lists = read_lists(list_file)
     results = {}
     for fn in lists:
-        with open(fn, 'r', encoding='utf8') as fin:
+        with open(fn, "r", encoding="utf8") as fin:
             results.update(json.load(fin))
     return results
 
 
 def load_wav(wav, target_sr):
-    speech, sample_rate = torchaudio.load(wav, backend='soundfile')
+    speech, sample_rate = torchaudio.load(wav, backend="soundfile")
     speech = speech.mean(dim=0, keepdim=True)
     if sample_rate != target_sr:
-        assert sample_rate > target_sr, 'wav sample rate {} must be greater than {}'.format(sample_rate, target_sr)
-        speech = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=target_sr)(speech)
+        assert sample_rate > target_sr, (
+            "wav sample rate {} must be greater than {}".format(sample_rate, target_sr)
+        )
+        speech = torchaudio.transforms.Resample(
+            orig_freq=sample_rate, new_freq=target_sr
+        )(speech)
     return speech
 
 
 def convert_onnx_to_trt(trt_model, onnx_model, fp16):
     import tensorrt as trt
+
     _min_shape = [(2, 80, 4), (2, 1, 4), (2, 80, 4), (2,), (2, 80), (2, 80, 4)]
     _opt_shape = [(2, 80, 193), (2, 1, 193), (2, 80, 193), (2,), (2, 80), (2, 80, 193)]
-    _max_shape = [(2, 80, 6800), (2, 1, 6800), (2, 80, 6800), (2,), (2, 80), (2, 80, 6800)]
+    _max_shape = [
+        (2, 80, 6800),
+        (2, 1, 6800),
+        (2, 80, 6800),
+        (2,),
+        (2, 80),
+        (2, 80, 6800),
+    ]
     input_names = ["x", "mask", "mu", "t", "spks", "cond"]
 
     logging.info("Converting onnx to trt...")
@@ -70,7 +84,7 @@ def convert_onnx_to_trt(trt_model, onnx_model, fp16):
         if not parser.parse(f.read()):
             for error in range(parser.num_errors):
                 print(parser.get_error(error))
-            raise ValueError('failed to parse {}'.format(onnx_model))
+            raise ValueError("failed to parse {}".format(onnx_model))
     # set input shapes
     for i in range(len(input_names)):
         profile.set_shape(input_names[i], _min_shape[i], _opt_shape[i], _max_shape[i])

@@ -1,10 +1,9 @@
-import math, pdb, os
-from time import time as ttime
+import math
 import torch
 from torch import nn
 from torch.nn import functional as F
 
-from torch.nn import Conv1d, ConvTranspose1d, AvgPool1d, Conv2d
+from torch.nn import Conv1d, ConvTranspose1d, Conv2d
 from torch.nn.utils import weight_norm, remove_weight_norm, spectral_norm
 import numpy as np
 
@@ -12,8 +11,7 @@ from .commons import init_weights
 from . import commons
 from . import modules
 from . import attentions
-from . import commons
-from .commons import init_weights, get_padding
+from .commons import get_padding
 
 
 class TextEncoder256(nn.Module):
@@ -335,13 +333,17 @@ class SineGen(torch.nn.Module):
                 f0_buf[:, :, idx + 1] = f0_buf[:, :, 0] * (
                     idx + 2
                 )  # idx + 2: the (idx+1)-th overtone, (idx+2)-th harmonic
-            rad_values = (f0_buf / self.sampling_rate) % 1  ###%1意味着n_har的乘积无法后处理优化
+            rad_values = (
+                f0_buf / self.sampling_rate
+            ) % 1  ###%1意味着n_har的乘积无法后处理优化
             rand_ini = torch.rand(
                 f0_buf.shape[0], f0_buf.shape[2], device=f0_buf.device
             )
             rand_ini[:, 0] = 0
             rad_values[:, 0, :] = rad_values[:, 0, :] + rand_ini
-            tmp_over_one = torch.cumsum(rad_values, 1)  # % 1  #####%1意味着后面的cumsum无法再优化
+            tmp_over_one = torch.cumsum(
+                rad_values, 1
+            )  # % 1  #####%1意味着后面的cumsum无法再优化
             tmp_over_one *= upp
             tmp_over_one = F.interpolate(
                 tmp_over_one.transpose(2, 1),
@@ -351,9 +353,7 @@ class SineGen(torch.nn.Module):
             ).transpose(2, 1)
             rad_values = F.interpolate(
                 rad_values.transpose(2, 1), scale_factor=upp, mode="nearest"
-            ).transpose(
-                2, 1
-            )  #######
+            ).transpose(2, 1)  #######
             tmp_over_one %= 1
             tmp_over_one_idx = (tmp_over_one[:, 1:, :] - tmp_over_one[:, :-1, :]) < 0
             cumsum_shift = torch.zeros_like(rad_values)
@@ -552,7 +552,7 @@ class SynthesizerTrnMs256NSFsid(nn.Module):
         spk_embed_dim,
         gin_channels,
         sr,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         if type(sr) == type("strr"):
@@ -663,7 +663,7 @@ class SynthesizerTrnMs768NSFsid(nn.Module):
         spk_embed_dim,
         gin_channels,
         sr,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         if type(sr) == type("strr"):
@@ -774,7 +774,7 @@ class SynthesizerTrnMs256NSFsid_nono(nn.Module):
         spk_embed_dim,
         gin_channels,
         sr=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.spec_channels = spec_channels
@@ -876,7 +876,7 @@ class SynthesizerTrnMs768NSFsid_nono(nn.Module):
         spk_embed_dim,
         gin_channels,
         sr=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.spec_channels = spec_channels

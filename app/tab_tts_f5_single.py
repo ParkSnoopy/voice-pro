@@ -10,81 +10,158 @@ sys.path.append(parent_dir)
 import gradio as gr
 from src.config import UserConfig
 
-import src.ui as ui
 from src.i18n.i18n import I18nAuto
+
 i18n = I18nAuto()
 
 from app.gradio_tts_f5 import *
 from app.gradio_voice_celeb import *
 
 
-
 def tts_f5_single_tab(user_config: UserConfig):
     tts = GradioF5TTS(user_config)
     voice = GradioCelebVoice(user_config)
-    subtitle_exts = [ '.ass', '.ssa', '.srt', '.mpl2', '.tmp', '.vtt', '.microdvd', '.json']
+    subtitle_exts = [
+        ".ass",
+        ".ssa",
+        ".srt",
+        ".mpl2",
+        ".tmp",
+        ".vtt",
+        ".microdvd",
+        ".json",
+    ]
     system = platform.system()
-    
-    with gr.Row():   
-        with gr.Column(scale=4):                     
-            with gr.Group():                            
-                gr.HTML(f'<center><h4>{i18n("Voice")}</h4></center>')
-                language_radio = gr.Radio(choices=voice.gradio_f5_languages(), label=i18n("Language"), value="English")
-                celeb_voice_dropdown = gr.Dropdown(label=i18n("Voice"), choices=voice.gradio_voices(), value=None)                                                    
-                celeb_audio = gr.Audio(label="Reference Audio", sources=['upload', 'microphone'], type="filepath", interactive=True)
-                celeb_transcript = gr.Textbox(label=i18n("Transcript"), interactive=True, max_lines=12, lines=6,
-                                              placeholder=i18n("Optional"))
-                celeb_image = gr.Image(label="Photo", type="filepath", interactive=False, show_download_button=False)                                              
+
+    with gr.Row():
+        with gr.Column(scale=4):
+            with gr.Group():
+                gr.HTML(f"<center><h4>{i18n('Voice')}</h4></center>")
+                language_radio = gr.Radio(
+                    choices=voice.gradio_f5_languages(),
+                    label=i18n("Language"),
+                    value="English",
+                )
+                celeb_voice_dropdown = gr.Dropdown(
+                    label=i18n("Voice"), choices=voice.gradio_voices(), value=None
+                )
+                celeb_audio = gr.Audio(
+                    label="Reference Audio",
+                    sources=["upload", "microphone"],
+                    type="filepath",
+                    interactive=True,
+                )
+                celeb_transcript = gr.Textbox(
+                    label=i18n("Transcript"),
+                    interactive=True,
+                    max_lines=12,
+                    lines=6,
+                    placeholder=i18n("Optional"),
+                )
+                celeb_image = gr.Image(
+                    label="Photo",
+                    type="filepath",
+                    interactive=False,
+                    show_download_button=False,
+                )
         with gr.Column(scale=8):
             with gr.Group():
-                gr.HTML(f'<center><h4>{i18n("Script")}</h4></center>')     
-                dubbing_file_in = gr.File(label=i18n("Subtitle File"), type="filepath", file_count="single", file_types=subtitle_exts)
-                dubbing_text_in = gr.Textbox(label=i18n("Source Text"), interactive=True, show_label=True, max_lines=24, show_copy_button=True,
-                                                placeholder=i18n("Placeholder for Source Text"), lines=5)
+                gr.HTML(f"<center><h4>{i18n('Script')}</h4></center>")
+                dubbing_file_in = gr.File(
+                    label=i18n("Subtitle File"),
+                    type="filepath",
+                    file_count="single",
+                    file_types=subtitle_exts,
+                )
+                dubbing_text_in = gr.Textbox(
+                    label=i18n("Source Text"),
+                    interactive=True,
+                    show_label=True,
+                    max_lines=24,
+                    show_copy_button=True,
+                    placeholder=i18n("Placeholder for Source Text"),
+                    lines=5,
+                )
             with gr.Group():
-                gr.HTML(f'<center><h4>{i18n("Synthesized voice")}</h4></center>')
-                dubbing_audio = gr.Audio(label=i18n("Audio"), type="filepath", interactive=False)
-                dubbing_file_out = gr.File(label=i18n("File"), type="filepath", file_count="single", interactive=False)
+                gr.HTML(f"<center><h4>{i18n('Synthesized voice')}</h4></center>")
+                dubbing_audio = gr.Audio(
+                    label=i18n("Audio"), type="filepath", interactive=False
+                )
+                dubbing_file_out = gr.File(
+                    label=i18n("File"),
+                    type="filepath",
+                    file_count="single",
+                    interactive=False,
+                )
             with gr.Row():
-                workspace_button = gr.Button(value=i18n("🗂️ Open workspace folder"), variant="secondary")
-                temp_button = gr.Button(value=i18n("🗀 Open Temp folder"), variant="secondary")                        
-        with gr.Column(scale=4):                     
-            with gr.Group():                            
-                gr.HTML(f'<center><h4>{i18n("Speech Generation")}</h4></center>')
-                model_choice = gr.Dropdown(choices=tts.gradio_available_models(), label="Choose Model", value="SWivid/F5-TTS_v1")
-                f5_tts_speed = gr.Slider(0.3, 2.0, value=1.0, step = 0.1, label=i18n("Speech rate"), info="0.3 ~ 2.0")
-                audio_format_radio = gr.Radio(label=i18n("Audio Format"), choices=["wav", "flac", "mp3"], value=user_config.get("audio_format", "mp3"))                   
+                workspace_button = gr.Button(
+                    value=i18n("🗂️ Open workspace folder"), variant="secondary"
+                )
+                temp_button = gr.Button(
+                    value=i18n("🗀 Open Temp folder"), variant="secondary"
+                )
+        with gr.Column(scale=4):
+            with gr.Group():
+                gr.HTML(f"<center><h4>{i18n('Speech Generation')}</h4></center>")
+                model_choice = gr.Dropdown(
+                    choices=tts.gradio_available_models(),
+                    label="Choose Model",
+                    value="SWivid/F5-TTS_v1",
+                )
+                f5_tts_speed = gr.Slider(
+                    0.3,
+                    2.0,
+                    value=1.0,
+                    step=0.1,
+                    label=i18n("Speech rate"),
+                    info="0.3 ~ 2.0",
+                )
+                audio_format_radio = gr.Radio(
+                    label=i18n("Audio Format"),
+                    choices=["wav", "flac", "mp3"],
+                    value=user_config.get("audio_format", "mp3"),
+                )
             with gr.Row():
-                f5_default_button = gr.ClearButton(value=i18n("Load Defaults")) 
-                dubbing_button = gr.Button(value=i18n("Synthesis"), variant="primary")  
-     
+                f5_default_button = gr.ClearButton(value=i18n("Load Defaults"))
+                dubbing_button = gr.Button(value=i18n("Synthesis"), variant="primary")
+
     # AI debbing
-    dubbing_file_in.upload(tts.gradio_upload_file,
-                        inputs=[dubbing_file_in],
-                        outputs=[dubbing_text_in])
-        
+    dubbing_file_in.upload(
+        tts.gradio_upload_file, inputs=[dubbing_file_in], outputs=[dubbing_text_in]
+    )
+
     workspace_button.click(tts.gradio_workspace_folder)
     temp_button.click(tts.gradio_temp_folder)
-    
-    language_radio.change(voice.gradio_change_language,
-                        inputs=[language_radio],
-                        outputs=[celeb_voice_dropdown])      
-    
-    celeb_voice_dropdown.change(voice.gradio_change_voice,
-                            inputs=[celeb_voice_dropdown],
-                            outputs=[celeb_audio, celeb_transcript, celeb_image])
-    
-    celeb_audio.clear(voice.gradio_clear_voice,
-                      inputs=None,
-                      outputs=[celeb_transcript, celeb_image])
-    
-    f5_default_button.click(tts.gradio_f5_default,
-                        outputs=[model_choice, f5_tts_speed, audio_format_radio])
-   
-    dubbing_button.click(tts.gradio_tts_dubbing_single, 
-                inputs=[dubbing_text_in, celeb_audio, celeb_transcript, model_choice, f5_tts_speed, audio_format_radio], 
-                outputs=[dubbing_audio, dubbing_file_out])     
-            
-            
-     
-   
+
+    language_radio.change(
+        voice.gradio_change_language,
+        inputs=[language_radio],
+        outputs=[celeb_voice_dropdown],
+    )
+
+    celeb_voice_dropdown.change(
+        voice.gradio_change_voice,
+        inputs=[celeb_voice_dropdown],
+        outputs=[celeb_audio, celeb_transcript, celeb_image],
+    )
+
+    celeb_audio.clear(
+        voice.gradio_clear_voice, inputs=None, outputs=[celeb_transcript, celeb_image]
+    )
+
+    f5_default_button.click(
+        tts.gradio_f5_default, outputs=[model_choice, f5_tts_speed, audio_format_radio]
+    )
+
+    dubbing_button.click(
+        tts.gradio_tts_dubbing_single,
+        inputs=[
+            dubbing_text_in,
+            celeb_audio,
+            celeb_transcript,
+            model_choice,
+            f5_tts_speed,
+            audio_format_radio,
+        ],
+        outputs=[dubbing_audio, dubbing_file_out],
+    )

@@ -12,20 +12,21 @@ from ._explorers import MyExplorer
 
 @MyExplorer
 def explorer(launcher):
-    launcher.slurm_(
-        gpus=8,
-        time=3 * 24 * 60,
-        partition='devlab,learnlab')
+    launcher.slurm_(gpus=8, time=3 * 24 * 60, partition="devlab,learnlab")
 
-    launcher.bind_({'ema.epoch': [0.9, 0.95]})
-    launcher.bind_({'ema.batch': [0.9995, 0.9999]})
-    launcher.bind_({'epochs': 600})
+    launcher.bind_({"ema.epoch": [0.9, 0.95]})
+    launcher.bind_({"ema.batch": [0.9995, 0.9999]})
+    launcher.bind_({"epochs": 600})
 
-    base = {'model': 'demucs', 'demucs.dconv_mode': 0, 'demucs.gelu': False,
-            'demucs.lstm_layers': 2}
-    newt = {'model': 'demucs', 'demucs.normalize': True}
-    hdem = {'model': 'hdemucs'}
-    svd = {'svd.penalty': 1e-5, 'svd': 'base2'}
+    base = {
+        "model": "demucs",
+        "demucs.dconv_mode": 0,
+        "demucs.gelu": False,
+        "demucs.lstm_layers": 2,
+    }
+    newt = {"model": "demucs", "demucs.normalize": True}
+    hdem = {"model": "hdemucs"}
+    svd = {"svd.penalty": 1e-5, "svd": "base2"}
 
     with launcher.job_array():
         for model in [base, newt, hdem]:
@@ -42,9 +43,15 @@ def explorer(launcher):
                 # Ablation study
                 sub()
                 abl = sub.bind(svd)
-                abl({'ema.epoch': [], 'ema.batch': []})
-                abl({'demucs.dconv_lstm': 10})
-                abl({'demucs.dconv_attn': 10})
-                abl({'demucs.dconv_attn': 10, 'demucs.dconv_lstm': 10, 'demucs.lstm_layers': 2})
-                abl({'demucs.dconv_mode': 0})
-                abl({'demucs.gelu': False})
+                abl({"ema.epoch": [], "ema.batch": []})
+                abl({"demucs.dconv_lstm": 10})
+                abl({"demucs.dconv_attn": 10})
+                abl(
+                    {
+                        "demucs.dconv_attn": 10,
+                        "demucs.dconv_lstm": 10,
+                        "demucs.lstm_layers": 2,
+                    }
+                )
+                abl({"demucs.dconv_mode": 0})
+                abl({"demucs.gelu": False})

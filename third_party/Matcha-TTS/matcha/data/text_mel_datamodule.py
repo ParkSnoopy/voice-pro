@@ -183,7 +183,9 @@ class TextMelDataset(torch.utils.data.Dataset):
             self.f_max,
             center=False,
         ).squeeze()
-        mel = normalize(mel, self.data_parameters["mel_mean"], self.data_parameters["mel_std"])
+        mel = normalize(
+            mel, self.data_parameters["mel_mean"], self.data_parameters["mel_std"]
+        )
         return mel
 
     def get_text(self, text, add_blank=True):
@@ -228,4 +230,10 @@ class TextMelBatchCollate:
         x_lengths = torch.tensor(x_lengths, dtype=torch.long)
         spks = torch.tensor(spks, dtype=torch.long) if self.n_spks > 1 else None
 
-        return {"x": x, "x_lengths": x_lengths, "y": y, "y_lengths": y_lengths, "spks": spks}
+        return {
+            "x": x,
+            "x_lengths": x_lengths,
+            "y": y,
+            "y_lengths": y_lengths,
+            "spks": spks,
+        }

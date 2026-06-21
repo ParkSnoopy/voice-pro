@@ -5,8 +5,8 @@ import numpy as np
 import soundfile as sf
 import librosa
 import noisereduce as nr
-from scipy.io import wavfile
 from rvc.infer.pipeline import Pipeline as VC
+
 # from audio_upscaler import upscale
 from rvc.lib.utils import load_audio, load_embedding
 from rvc.lib.tools.split_audio import process_audio, merge_audio
@@ -80,28 +80,26 @@ class VoiceConverter:
 
             # librosa를 사용하여 오디오 파일 읽기
             data, rate = librosa.load(input_audio_path, sr=None)
-            
+
             # 스테레오를 모노로 변환 (필요한 경우)
             if len(data.shape) > 1:
                 data = np.mean(data, axis=1)
-            
+
             # 데이터 타입을 float32로 변환
             data = data.astype(np.float32)
-            
+
             # 노이즈 감소 적용
             reduced_noise = nr.reduce_noise(
                 y=data, sr=rate, prop_decrease=reduction_strength, use_torch=False
             )
-            
+
             # 결과를 float32로 유지
             reduced_noise = reduced_noise.astype(np.float32)
-            
+
             return reduced_noise
         except Exception as error:
             print(f"Error cleaning audio: {error}")
-            return None    
-    
-
+            return None
 
     @staticmethod
     def convert_audio_format(input_path, output_path, output_format):
@@ -186,11 +184,10 @@ class VoiceConverter:
             A tuple containing the target sampling rate and the converted audio data,
             or an error message if conversion fails.
         """
-        
+
         # print(f"voice_conversion: input_audio_path = {input_audio_path}, output_path = {output_path}, \
         #     file_index = {file_index}, split_audio = {split_audio}, ")
-        
-        
+
         f0_up_key = int(f0_up_key)
         try:
             audio = load_audio(input_audio_path, 16000)
@@ -213,7 +210,6 @@ class VoiceConverter:
             )
             if self.tgt_sr != resample_sr >= 16000:
                 self.tgt_sr = resample_sr
-
 
             if split_audio == "True":
                 result, new_dir_path = process_audio(input_audio_path)

@@ -71,7 +71,9 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         self.update_data_statistics(data_statistics)
 
     @torch.inference_mode()
-    def synthesise(self, x, x_lengths, n_timesteps, temperature=1.0, spks=None, length_scale=1.0):
+    def synthesise(
+        self, x, x_lengths, n_timesteps, temperature=1.0, spks=None, length_scale=1.0
+    ):
         """
         Generates mel-spectrogram from text. Returns:
             1. encoder outputs
@@ -201,12 +203,25 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         #   - Do not need this hack for Matcha-TTS, but it works with it as well
         if not isinstance(out_size, type(None)):
             max_offset = (y_lengths - out_size).clamp(0)
-            offset_ranges = list(zip([0] * max_offset.shape[0], max_offset.cpu().numpy()))
+            offset_ranges = list(
+                zip([0] * max_offset.shape[0], max_offset.cpu().numpy())
+            )
             out_offset = torch.LongTensor(
-                [torch.tensor(random.choice(range(start, end)) if end > start else 0) for start, end in offset_ranges]
+                [
+                    torch.tensor(random.choice(range(start, end)) if end > start else 0)
+                    for start, end in offset_ranges
+                ]
             ).to(y_lengths)
-            attn_cut = torch.zeros(attn.shape[0], attn.shape[1], out_size, dtype=attn.dtype, device=attn.device)
-            y_cut = torch.zeros(y.shape[0], self.n_feats, out_size, dtype=y.dtype, device=y.device)
+            attn_cut = torch.zeros(
+                attn.shape[0],
+                attn.shape[1],
+                out_size,
+                dtype=attn.dtype,
+                device=attn.device,
+            )
+            y_cut = torch.zeros(
+                y.shape[0], self.n_feats, out_size, dtype=y.dtype, device=y.device
+            )
 
             y_cut_lengths = []
             for i, (y_, out_offset_) in enumerate(zip(y, out_offset)):
@@ -228,10 +243,14 @@ class MatchaTTS(BaseLightningClass):  # 🍵
         mu_y = mu_y.transpose(1, 2)
 
         # Compute loss of the decoder
-        diff_loss, _ = self.decoder.compute_loss(x1=y, mask=y_mask, mu=mu_y, spks=spks, cond=cond)
+        diff_loss, _ = self.decoder.compute_loss(
+            x1=y, mask=y_mask, mu=mu_y, spks=spks, cond=cond
+        )
 
         if self.prior_loss:
-            prior_loss = torch.sum(0.5 * ((y - mu_y) ** 2 + math.log(2 * math.pi)) * y_mask)
+            prior_loss = torch.sum(
+                0.5 * ((y - mu_y) ** 2 + math.log(2 * math.pi)) * y_mask
+            )
             prior_loss = prior_loss / (torch.sum(y_mask) * self.n_feats)
         else:
             prior_loss = 0

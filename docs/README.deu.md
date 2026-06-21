@@ -6,7 +6,7 @@
     version: 2.0.0
     last-updated: 2025-02-23
     product-type: KI-Multimedia-Verarbeitungssoftware
-    platforms: Windows
+    platforms: Linux
     technology-stack: Whisper, Edge-TTS, Gradio, CUDA, Faster-Whisper, Whisper-Timestamped, WhisperX, E2-TTS, F5-TTS, YouTube Downloader, Demucs, MDX-Net, RVC, CosyVoice, kokoro
     license: LGPL
 -->
@@ -87,9 +87,9 @@ Als starke Alternative zu **ElevenLabs** bietet Voice-Pro Podcastern, Entwickler
 ## ⚠️ Bitte beachten
 - Aufgrund der [WeConnect](https://www.wctokyoseoul.com)-Entwicklungsarbeit sind Voice-Pro-Entwicklung und Updates vorerst nicht möglich.
 - Wir haben den gesamten Voice-Pro-Code als Open Source veröffentlicht und vollständig kostenlos gemacht. Voice-Pro kann jetzt von jedem frei verteilt und modifiziert werden.
-- Es funktioniert gut unter Windows mit NVIDIA GPU. Der Betrieb unter Mac und Linux wurde nicht überprüft.
+- Zielplattform ist Linux mit NVIDIA GPU.
 - Bitte hinterlassen Sie Ihre Anfragen auf den [![GitHub Issues](https://img.shields.io/github/issues/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/issues)- oder [![GitHub Discussions](https://img.shields.io/github/discussions/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/discussions)-Seiten.
-- **Fehlerbehebung**: In den meisten Fällen können Probleme durch das Löschen des `installer_files`-Ordners und das anschließende Ausführen von `configure.bat` gefolgt von `start.bat` behoben werden.
+- **Fehlerbehebung**: In den meisten Fällen können Probleme durch das Löschen des `installer_files`-Ordners und das anschließende Ausführen von `configure.sh` gefolgt von `start.sh` behoben werden.
 
 
 
@@ -100,7 +100,7 @@ Als starke Alternative zu **ElevenLabs** bietet Voice-Pro Podcastern, Entwickler
 
 - Wir haben uns in den letzten Monaten auf die Entwicklung von [WeConnect](https://www.wctokyoseoul.com) konzentriert und konnten Voice-Pro überhaupt nicht verwalten. 
 - Wir haben beschlossen, den gesamten Voice-Pro-Code zu öffnen.
-- Voice-Pro ist vollständig kostenlos und unterstützt Windows, Mac, Linux.
+- Voice-Pro ist vollständig kostenlos und unterstützt Linux.
 - [WeConnect](https://www.wctokyoseoul.com) ist eine Anwendung für den globalen Kulturaustausch.
 - Verbinden Sie sich mit Menschen aus aller Welt für bedeutungsvolle Kulturaustausche, Sprachenlernen und internationale Freundschaften.
 
@@ -405,7 +405,7 @@ Japanese
 
 
 ## 💻 Systemanforderungen
-- **OS:** Windows 10/11 (64-Bit), Linux, Mac
+- **OS:** Linux (64-Bit)
 - **GPU:** NVIDIA mit CUDA 12.4 (empfohlen)
 - **VRAM:** 4 GB+ (8 GB+ bevorzugt)
 - **RAM:** 4 GB+
@@ -414,7 +414,7 @@ Japanese
 
 ## 📀 Installation
 
-Mit **configure.bat** und **start.bat** lässt sich Voice-Pro einfach installieren (auf Mac/Linux verwenden Sie configure.sh und start.sh).
+Mit **configure.sh** und **start.sh** lässt sich Voice-Pro einfach installieren.
 
 ### 1. Paketvorbereitung
 - Laden Sie die neueste Version von [![GitHub Release](https://img.shields.io/github/v/release/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/) herunter (**Source code (zip)**)
@@ -423,29 +423,29 @@ git clone https://github.com/abus-aikorea/voice-pro.git
 ```
 
 ### 2. Installation und Ausführung
-1. 🚀 **configure.bat**
+1. 🚀 **configure.sh**
    - Installiert git, ffmpeg und CUDA (bei NVIDIA-GPU)
    - Einmalige Ausführung; Internet erforderlich, kann über 1 Stunde dauern
    - Schließen Sie das Befehlsfenster nicht
-2. 🚀 **start.bat**
+2. 🚀 **start.sh**
    - Startet die Voice-Pro-WebUI
    - Bei erstmaliger Ausführung werden Abhängigkeiten installiert (kann über 1 Stunde dauern)
    - Bei Problemen **installer_files** löschen und erneut ausführen
 
 ### 3. Update
-- 🚀 **update.bat**: Aktualisiert die Python-Umgebung (schneller als Neuinstallation)
+- 🚀 **update.sh**: Aktualisiert die Python-Umgebung (schneller als Neuinstallation)
 
 ### 4. Deinstallation
-- Führen Sie **uninstall.bat** aus oder löschen Sie den Ordner (portable Installation)
+- Führen Sie **uninstall.sh** aus oder löschen Sie den Ordner (portable Installation)
 
 ## ❓ Nutzungstipps
 
 #### Wenn der Browser nicht automatisch startet
-- Schließen Sie das Windows-Befehlsfenster und führen Sie **start.bat** erneut aus
-- Öffnen Sie den Browser manuell und geben Sie die im Befehlsfenster angezeigte Adresse ein (z. B. **http://127.0.0.1:7870**)
+- Schließen Sie das Terminal und führen Sie **start.sh** erneut aus
+- Öffnen Sie den Browser manuell und geben Sie die im Terminal angezeigte Adresse ein (z. B. **http://127.0.0.1:7870**)
 
 #### Bei einem CUDA-Out-of-Memory-Fehler
-- Überprüfen Sie den GPU-Speicherstatus im Windows Task-Manager – Reiter „Leistung“
+- Überprüfen Sie den GPU-Speicherstatus im Systemmonitor – Reiter „Leistung“
 - Stellen Sie den Rauschunterdrückungslevel auf 0 oder 1 ein (Level 2 erfordert mindestens 8 GB GPU-Speicher)
 - Stellen Sie den Berechnungstyp auf „int“ ein („float“ bietet bessere Qualität, benötigt aber mehr GPU-Speicher)
 

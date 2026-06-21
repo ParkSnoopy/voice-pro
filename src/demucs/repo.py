@@ -28,21 +28,23 @@ class ModelLoadingError(RuntimeError):
 
 def check_checksum(path: Path, checksum: str):
     sha = sha256()
-    with open(path, 'rb') as file:
+    with open(path, "rb") as file:
         while True:
             buf = file.read(2**20)
             if not buf:
                 break
             sha.update(buf)
-    actual_checksum = sha.hexdigest()[:len(checksum)]
+    actual_checksum = sha.hexdigest()[: len(checksum)]
     if actual_checksum != checksum:
-        raise ModelLoadingError(f'Invalid checksum for file {path}, '
-                                f'expected {checksum} but got {actual_checksum}')
+        raise ModelLoadingError(
+            f"Invalid checksum for file {path}, "
+            f"expected {checksum} but got {actual_checksum}"
+        )
 
 
 class ModelOnlyRepo:
-    """Base class for all model only repos.
-    """
+    """Base class for all model only repos."""
+
     def has_model(self, sig: str) -> bool:
         raise NotImplementedError()
 
@@ -64,9 +66,12 @@ class RemoteRepo(ModelOnlyRepo):
         try:
             url = self._models[sig]
         except KeyError:
-            raise ModelLoadingError(f'Could not find a pre-trained model with signature {sig}.')
+            raise ModelLoadingError(
+                f"Could not find a pre-trained model with signature {sig}."
+            )
         pkg = torch.hub.load_state_dict_from_url(
-            url, map_location='cpu', check_hash=True)  # type: ignore
+            url, map_location="cpu", check_hash=True
+        )  # type: ignore
         return load_model(pkg)
 
     def list_model(self) -> tp.Dict[str, tp.Union[str, Path]]:
@@ -82,16 +87,17 @@ class LocalRepo(ModelOnlyRepo):
         self._models = {}
         self._checksums = {}
         for file in self.root.iterdir():
-            if file.suffix == '.th':
-                if '-' in file.stem:
-                    xp_sig, checksum = file.stem.split('-')
+            if file.suffix == ".th":
+                if "-" in file.stem:
+                    xp_sig, checksum = file.stem.split("-")
                     self._checksums[xp_sig] = checksum
                 else:
                     xp_sig = file.stem
                 if xp_sig in self._models:
                     raise ModelLoadingError(
-                        f'Duplicate pre-trained model exist for signature {xp_sig}. '
-                        'Please delete all but one.')
+                        f"Duplicate pre-trained model exist for signature {xp_sig}. "
+                        "Please delete all but one."
+                    )
                 self._models[xp_sig] = file
 
     def has_model(self, sig: str) -> bool:
@@ -101,7 +107,9 @@ class LocalRepo(ModelOnlyRepo):
         try:
             file = self._models[sig]
         except KeyError:
-            raise ModelLoadingError(f'Could not find pre-trained model with signature {sig}.')
+            raise ModelLoadingError(
+                f"Could not find pre-trained model with signature {sig}."
+            )
         if sig in self._checksums:
             check_checksum(file, self._checksums[sig])
         return load_model(file)
@@ -114,6 +122,7 @@ class BagOnlyRepo:
     """Handles only YAML files containing bag of models, leaving the actual
     model loading to some Repo.
     """
+
     def __init__(self, root: Path, model_repo: ModelOnlyRepo):
         self.root = root
         self.model_repo = model_repo
@@ -122,7 +131,7 @@ class BagOnlyRepo:
     def scan(self):
         self._bags = {}
         for file in self.root.iterdir():
-            if file.suffix == '.yaml':
+            if file.suffix == ".yaml":
                 self._bags[file.stem] = file
 
     def has_model(self, name: str) -> bool:
@@ -132,13 +141,14 @@ class BagOnlyRepo:
         try:
             yaml_file = self._bags[name]
         except KeyError:
-            raise ModelLoadingError(f'{name} is neither a single pre-trained model or '
-                                    'a bag of models.')
+            raise ModelLoadingError(
+                f"{name} is neither a single pre-trained model or a bag of models."
+            )
         bag = yaml.safe_load(open(yaml_file))
-        signatures = bag['models']
+        signatures = bag["models"]
         models = [self.model_repo.get_model(sig) for sig in signatures]
-        weights = bag.get('weights')
-        segment = bag.get('segment')
+        weights = bag.get("weights")
+        segment = bag.get("segment")
         return BagOfModels(models, weights, segment)
 
     def list_model(self) -> tp.Dict[str, tp.Union[str, Path]]:
@@ -151,7 +161,9 @@ class AnyModelRepo:
         self.bag_repo = bag_repo
 
     def has_model(self, name_or_sig: str) -> bool:
-        return self.model_repo.has_model(name_or_sig) or self.bag_repo.has_model(name_or_sig)
+        return self.model_repo.has_model(name_or_sig) or self.bag_repo.has_model(
+            name_or_sig
+        )
 
     def get_model(self, name_or_sig: str) -> AnyModel:
         if self.model_repo.has_model(name_or_sig):

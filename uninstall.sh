@@ -34,22 +34,14 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Removing system packages..."
     
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS - using Homebrew
-        if command -v brew &> /dev/null; then
-            brew uninstall ffmpeg git || true
-        fi
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Linux
-        if command -v apt-get &> /dev/null; then
-            sudo apt-get remove -y git ffmpeg build-essential || true
-        elif command -v yum &> /dev/null; then
-            sudo yum remove -y git ffmpeg gcc gcc-c++ make || true
-        elif command -v dnf &> /dev/null; then
-            sudo dnf remove -y git ffmpeg gcc gcc-c++ make || true
-        elif command -v pacman &> /dev/null; then
-            sudo pacman -R --noconfirm git ffmpeg base-devel || true
-        fi
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get remove -y git ffmpeg build-essential || true
+    elif command -v yum &> /dev/null; then
+        sudo yum remove -y git ffmpeg gcc gcc-c++ make || true
+    elif command -v dnf &> /dev/null; then
+        sudo dnf remove -y git ffmpeg gcc gcc-c++ make || true
+    elif command -v pacman &> /dev/null; then
+        sudo pacman -R --noconfirm git ffmpeg base-devel || true
     fi
 fi
 

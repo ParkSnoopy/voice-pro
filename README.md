@@ -6,7 +6,7 @@
     version: 2.0.0
     last-updated: 2025-02-23
     product-type: AI Multimedia Processing Software
-    platforms: Windows
+    platforms: Linux
     technology-stack: Whisper, Edge-TTS, Gradio, CUDA, Faster-Whisper, Whisper-Timestamped, WhisperX, E2-TTS, F5-TTS, YouTube Downloader, Demucs, MDX-Net, RVC, CosyVoice, kokoro
     license: LGPL
 -->
@@ -89,9 +89,9 @@ A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developer
 ## ⚠️ Please Note
 - Due to [WeConnect](https://www.wctokyoseoul.com) development work, Voice-Pro development and updates are not possible for the time being.
 - We have made all Voice-Pro code open source and completely free. Voice-Pro can now be freely distributed and modified by anyone.
-- It works well on Windows with NVIDIA GPU. Operation on Mac and Linux has not been verified.
+- It targets Linux with NVIDIA GPU.
 - Please leave your requests on the [![GitHub Issues](https://img.shields.io/github/issues/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/issues)  or  [![GitHub Discussions](https://img.shields.io/github/discussions/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/discussions) pages.
-- **Troubleshooting**: In most cases, issues can be resolved by deleting the `installer_files` folder and then running `configure.bat` followed by `start.bat`.
+- **Troubleshooting**: In most cases, issues can be resolved by deleting the `installer_files` folder and then running `configure.sh` followed by `start.sh`.
 
 
 ## 📰 News & History
@@ -101,7 +101,7 @@ A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developer
 
 - We have been focusing on [WeConnect](https://www.wctokyoseoul.com) development for the past few months and have not been able to manage Voice-Pro at all. 
 - We have decided to open source all Voice-Pro code.
-- Voice-Pro is completely free and supports Windows, Mac, Linux.
+- Voice-Pro is completely free and supports Linux.
 - [WeConnect](https://www.wctokyoseoul.com) is an application for global cultural exchange.
 - Connect with people from all over the world for meaningful cultural exchanges, language learning, and international friendships.
 
@@ -414,7 +414,7 @@ Japanese
 
 
 ## 💻 System Requirements
-- **OS:** Windows 10/11 (64-bit), Linux, Mac
+- **OS:** Linux (64-bit)
 - **GPU:** NVIDIA with CUDA 12.4 (recommended)
 - **VRAM:** 4GB+ (8GB+ preferred)
 - **RAM:** 4GB+
@@ -425,7 +425,7 @@ Japanese
 
 ## 📀 Installation
 
-Install Voice-Pro with ease using **configure.bat** and **start.bat** (use configure.sh and start.sh on Mac/Linux).
+Install Voice-Pro with ease using **configure.sh** and **start.sh**.
 
 
 ### 1. Get the Package
@@ -437,30 +437,30 @@ git clone https://github.com/abus-aikorea/voice-pro.git
   
 
 ### 2. Install & Run
-1. 🚀 **configure.bat**
+1. 🚀 **configure.sh**
    - Sets up git, ffmpeg, and CUDA (if NVIDIA GPU)
    - Run once; takes 1+ hour with internet
-   - Don’t close the command window
-2. 🚀 **start.bat**
+   - Don't close the terminal
+2. 🚀 **start.sh**
    - Launches Voice-Pro WebUI
    - First run installs dependencies (1+ hour)
    - Retry after deleting **installer_files** if issues arise
 
 ### 3. Update
-- 🚀 **update.bat**: Refreshes Python environment (faster than reinstall)
+- 🚀 **update.sh**: Refreshes Python environment (faster than reinstall)
 
 ### 4. Uninstall
-- Run **uninstall.bat** or delete the folder (portable install)
+- Run **uninstall.sh** or delete the folder (portable install)
 
 
 ## ❓Tips & Tricks
 
 #### If Browser does not run automatically
-- Close the Windows-Commnad window and run start.bat again.
-- Run the browser directly and enter the address displayed in the Windows-Command window (e.g. **http://127.0.0.1:7870**) in the address bar.
+- Close the terminal and run start.sh again.
+- Run the browser directly and enter the address displayed in the terminal (e.g. **http://127.0.0.1:7870**) in the address bar.
 
 #### If a CUDA Out-Of-Memory error occurs
-- Check the GPU memory status in Windows Task Manager - Performance tab. 
+- Check the GPU memory status in the system monitor.
 - Set the Denoise level to 0 or 1. Denoise level 2 requires at least 8GB of GPU memory.
 - Set Compute Type to int type. The float type has better quality, but requires more GPU memory.
 

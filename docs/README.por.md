@@ -6,7 +6,7 @@
     version: 2.0.0
     last-updated: 2025-02-23
     product-type: Software de processamento multimídia AI
-    platforms: Windows
+    platforms: Linux
     technology-stack: Whisper, Edge-TTS, Gradio, CUDA, Faster-Whisper, Whisper-Timestamped, WhisperX, E2-TTS, F5-TTS, YouTube Downloader, Demucs, MDX-Net, RVC, CosyVoice, kokoro
     license: LGPL
 -->
@@ -87,9 +87,9 @@ Como uma alternativa robusta ao **ElevenLabs**, o Voice-Pro capacita podcasters,
 ## ⚠️ Por favor, note
 - Devido ao trabalho de desenvolvimento do [WeConnect](https://www.wctokyoseoul.com), o desenvolvimento e as atualizações do Voice-Pro não são possíveis por enquanto.
 - Tornamos todo o código do Voice-Pro de código aberto e completamente gratuito. O Voice-Pro agora pode ser distribuído e modificado livremente por qualquer pessoa.
-- Funciona bem no Windows com GPU NVIDIA. O funcionamento no Mac e Linux não foi verificado.
+- Destina-se ao Linux com GPU NVIDIA.
 - Por favor, deixe suas solicitações nas páginas de [![GitHub Issues](https://img.shields.io/github/issues/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/issues)  ou [![GitHub Discussions](https://img.shields.io/github/discussions/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/discussions) .
-- **Resolução de problemas**: Na maioria dos casos, os problemas podem ser resolvidos excluindo a pasta `installer_files` e, em seguida, executando `configure.bat` seguido por `start.bat`.
+- **Resolução de problemas**: Na maioria dos casos, os problemas podem ser resolvidos excluindo a pasta `installer_files` e, em seguida, executando `configure.sh` seguido por `start.sh`.
 
 
 
@@ -100,7 +100,7 @@ Como uma alternativa robusta ao **ElevenLabs**, o Voice-Pro capacita podcasters,
 
 - Estivemos focados no desenvolvimento do [WeConnect](https://www.wctokyoseoul.com) nos últimos meses e não conseguimos gerenciar o Voice-Pro. 
 - Decidimos abrir o código do Voice-Pro.
-- O Voice-Pro é completamente gratuito e suporta Windows, Mac, Linux.
+- O Voice-Pro é completamente gratuito e suporta Linux.
 - [WeConnect](https://www.wctokyoseoul.com) é um aplicativo para intercâmbio cultural global.
 - Conecte-se com pessoas de todo o mundo para intercâmbios culturais significativos, aprendizado de idiomas e amizades internacionais.
 
@@ -401,7 +401,7 @@ Japanese
 
 
 ## 💻 Requisitos do Sistema
-- **SO:** Windows 10/11 (64 bits), Linux, Mac
+- **SO:** Linux (64 bits)
 - **GPU:** NVIDIA com suporte a CUDA 12.4 (recomendado)
 - **VRAM:** 4 GB ou mais (8 GB+ preferível)
 - **RAM:** 4 GB ou mais
@@ -410,7 +410,7 @@ Japanese
 
 ## 📀 Instalação
 
-Instale o Voice-Pro facilmente com **configure.bat** e **start.bat** (use configure.sh e start.sh no Mac/Linux).
+Instale o Voice-Pro facilmente com **configure.sh** e **start.sh**.
 
 ### 1. Preparação do Pacote
 - Baixe a versão mais recente em [![GitHub Release](https://img.shields.io/github/v/release/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/) (**Source code (zip)**)
@@ -419,29 +419,29 @@ git clone https://github.com/abus-aikorea/voice-pro.git
 ```
 
 ### 2. Instalação e Execução
-1. 🚀 **configure.bat**
+1. 🚀 **configure.sh**
    - Instala git, ffmpeg e CUDA (se usar GPU NVIDIA)
    - Execute apenas uma vez; requer internet, pode levar mais de 1 hora
    - Não feche a janela de comando
-2. 🚀 **start.bat**
+2. 🚀 **start.sh**
    - Inicia a interface web do Voice-Pro
    - Na primeira execução, instala dependências (pode levar mais de 1 hora)
    - Em caso de problemas, delete **installer_files** e execute novamente
 
 ### 3. Atualização
-- 🚀 **update.bat**: Atualiza o ambiente Python (mais rápido que reinstalar)
+- 🚀 **update.sh**: Atualiza o ambiente Python (mais rápido que reinstalar)
 
 ### 4. Desinstalação
-- Execute **uninstall.bat** ou delete a pasta (instalação portátil)
+- Execute **uninstall.sh** ou delete a pasta (instalação portátil)
 
 ## ❓ Dicas de Uso
 
 #### Se o navegador não abrir automaticamente
-- Feche a janela de comando do Windows e execute **start.bat** novamente
-- Abra o navegador manualmente e insira o endereço exibido na janela de comando (ex.: **http://127.0.0.1:7870**)
+- Feche o terminal e execute **start.sh** novamente
+- Abra o navegador manualmente e insira o endereço exibido no terminal (ex.: **http://127.0.0.1:7870**)
 
 #### Se ocorrer um erro CUDA Out-of-Memory
-- Verifique o status da memória da GPU no Gerenciador de Tarefas do Windows - guia "Desempenho"
+- Verifique o status da memória da GPU no monitor do sistema - guia "Desempenho"
 - Defina o nível de remoção de ruído para 0 ou 1 (o nível 2 requer pelo menos 8 GB de memória GPU)
 - Configure o tipo de cálculo como "int" (o tipo "float" tem melhor qualidade, mas exige mais memória GPU)
 

@@ -1,4 +1,3 @@
-import re
 
 
 def timeformat_srt(time):
@@ -18,7 +17,7 @@ def timeformat_vtt(time):
 
 
 def write_file(subtitle, output_file):
-    with open(output_file, 'w', encoding='utf-8') as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         f.write(subtitle)
 
 
@@ -26,9 +25,11 @@ def get_srt(segments):
     output = ""
     for i, segment in enumerate(segments):
         output += f"{i + 1}\n"
-        output += f"{timeformat_srt(segment['start'])} --> {timeformat_srt(segment['end'])}\n"
-        if segment['text'].startswith(' '):
-            segment['text'] = segment['text'][1:]
+        output += (
+            f"{timeformat_srt(segment['start'])} --> {timeformat_srt(segment['end'])}\n"
+        )
+        if segment["text"].startswith(" "):
+            segment["text"] = segment["text"][1:]
         output += f"{segment['text']}\n\n"
     return output
 
@@ -37,16 +38,16 @@ def get_srt_wordlevel(segments):
     output = ""
     i = 0
     for segment in segments:
-        for word in segment['words']:
+        for word in segment["words"]:
             i += 1
             output += f"{i}\n"
             output += f"{timeformat_srt(word.start)} --> {timeformat_srt(word.end)}\n"
-            
-            striped = word.word.strip()
-            highlighted = f'<font color=\"#0e556a\"><b><u>{striped}</u></b></font>'
-            line = segment['text'].replace(striped, highlighted)
 
-            output += f"{line}\n\n"    
+            striped = word.word.strip()
+            highlighted = f'<font color="#0e556a"><b><u>{striped}</u></b></font>'
+            line = segment["text"].replace(striped, highlighted)
+
+            output += f"{line}\n\n"
     return output
 
 
@@ -54,77 +55,72 @@ def get_vtt(segments):
     output = "WebVTT\n\n"
     for i, segment in enumerate(segments):
         output += f"{i + 1}\n"
-        output += f"{timeformat_vtt(segment['start'])} --> {timeformat_vtt(segment['end'])}\n"
-        if segment['text'].startswith(' '):
-            segment['text'] = segment['text'][1:]
+        output += (
+            f"{timeformat_vtt(segment['start'])} --> {timeformat_vtt(segment['end'])}\n"
+        )
+        if segment["text"].startswith(" "):
+            segment["text"] = segment["text"][1:]
         output += f"{segment['text']}\n\n"
     return output
+
 
 def get_vtt_block(segments, start_idx=1):
     output = ""
     for i, segment in enumerate(segments):
         output += f"{i + start_idx}\n"
-        output += f"{timeformat_vtt(segment['start'])} --> {timeformat_vtt(segment['end'])}\n"
-        if segment['text'].startswith(' '):
-            segment['text'] = segment['text'][1:]
+        output += (
+            f"{timeformat_vtt(segment['start'])} --> {timeformat_vtt(segment['end'])}\n"
+        )
+        if segment["text"].startswith(" "):
+            segment["text"] = segment["text"][1:]
         output += f"{segment['text']}\n\n"
     return output
-
-
 
 
 def get_txt(segments):
     output = ""
     for i, segment in enumerate(segments):
-        if segment['text'].startswith(' '):
-            segment['text'] = segment['text'][1:]
+        if segment["text"].startswith(" "):
+            segment["text"] = segment["text"][1:]
         output += f"{segment['text']}\n"
     return output
 
 
 def parse_srt(file_path):
     """Reads SRT file and returns as dict"""
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         srt_data = file.read()
 
     data = []
-    blocks = srt_data.split('\n\n')
+    blocks = srt_data.split("\n\n")
 
     for block in blocks:
-        if block.strip() != '':
-            lines = block.strip().split('\n')
+        if block.strip() != "":
+            lines = block.strip().split("\n")
             index = lines[0]
             timestamp = lines[1]
-            sentence = ' '.join(lines[2:])
+            sentence = " ".join(lines[2:])
 
-            data.append({
-                "index": index,
-                "timestamp": timestamp,
-                "sentence": sentence
-            })
+            data.append({"index": index, "timestamp": timestamp, "sentence": sentence})
     return data
 
 
 def parse_vtt(file_path):
     """Reads WebVTT file and returns as dict"""
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         webvtt_data = file.read()
 
     data = []
-    blocks = webvtt_data.split('\n\n')
+    blocks = webvtt_data.split("\n\n")
 
     for block in blocks:
-        if block.strip() != '' and not block.strip().startswith("WebVTT"):
-            lines = block.strip().split('\n')
+        if block.strip() != "" and not block.strip().startswith("WebVTT"):
+            lines = block.strip().split("\n")
             index = lines[0]
             timestamp = lines[1]
-            sentence = ' '.join(lines[2:])
+            sentence = " ".join(lines[2:])
 
-            data.append({
-                "index": index,
-                "timestamp": timestamp,
-                "sentence": sentence
-            })
+            data.append({"index": index, "timestamp": timestamp, "sentence": sentence})
 
     return data
 
@@ -132,26 +128,26 @@ def parse_vtt(file_path):
 def get_serialized_srt(dicts):
     output = ""
     for dic in dicts:
-        output += f'{dic["index"]}\n'
-        output += f'{dic["timestamp"]}\n'
-        output += f'{dic["sentence"]}\n\n'
+        output += f"{dic['index']}\n"
+        output += f"{dic['timestamp']}\n"
+        output += f"{dic['sentence']}\n\n"
     return output
 
 
 def get_serialized_vtt(dicts):
     output = "WebVTT\n\n"
     for dic in dicts:
-        output += f'{dic["index"]}\n'
-        output += f'{dic["timestamp"]}\n'
-        output += f'{dic["sentence"]}\n\n'
+        output += f"{dic['index']}\n"
+        output += f"{dic['timestamp']}\n"
+        output += f"{dic['sentence']}\n\n"
     return output
-
 
 
 import time
 
+
 def safe_filename(name):
-    return f'{name}-{int(time.time())}'
+    return f"{name}-{int(time.time())}"
     # from app import _args
     # INVALID_FILENAME_CHARS = r'[<>:"/\\|?*\x00-\x1f]'
     # safe_name = re.sub(INVALID_FILENAME_CHARS, '_', name)

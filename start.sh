@@ -70,20 +70,9 @@ export TMP="$INSTALL_DIR"
 export TEMP="$INSTALL_DIR"
 
 # Determine platform
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
-    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py310_24.5.0-0-MacOSX-x86_64.sh"
-    MINICONDA_CHECKSUM="a95f99c31ee1d2bf87e51546b9c71f5820b792e05b0d2f4a1bc4618478efce15"
-    MINICONDA_INSTALLER="Miniconda3-py310_24.5.0-0-MacOSX-x86_64.sh"
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Linux
-    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py310_24.5.0-0-Linux-x86_64.sh"
-    MINICONDA_CHECKSUM="a95f99c31ee1d2bf87e51546b9c71f5820b792e05b0d2f4a1bc4618478efce15"
-    MINICONDA_INSTALLER="Miniconda3-py310_24.5.0-0-Linux-x86_64.sh"
-else
-    echo "Unsupported operating system: $OSTYPE"
-    exit 1
-fi
+MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-py310_24.5.0-0-Linux-x86_64.sh"
+MINICONDA_CHECKSUM="a95f99c31ee1d2bf87e51546b9c71f5820b792e05b0d2f4a1bc4618478efce15"
+MINICONDA_INSTALLER="Miniconda3-py310_24.5.0-0-Linux-x86_64.sh"
 
 # Function to check if conda base Python is corrupted
 check_conda_base_python() {
@@ -106,11 +95,6 @@ check_conda_base_python() {
     if ! "$python_bin" -c "print('OK')" 2>/dev/null | grep -q "OK"; then
         return 1  # Python cannot execute basic code = corrupted
     fi
-    
-    # Note: We don't check subprocess here because:
-    # 1. On macOS, subprocess.py tries to import msvcrt (Windows-only) which fails
-    # 2. This is expected behavior and Python handles it gracefully
-    # 3. The actual conda functionality doesn't require subprocess import to succeed at this stage
     
     return 0  # Python is OK
 }
@@ -161,16 +145,13 @@ if [ "$CONDA_EXISTS" == "F" ] || [ "$CONDA_BASE_CORRUPTED" == "T" ]; then
     
     # Verify checksum (simplified check)
     echo "Installing Miniconda to $CONDA_ROOT_PREFIX"
-    # Run installer - python.app package may fail on macOS but conda should still work
-    # Use set +e temporarily to allow installation to continue even if python.app fails
-    # The installer may exit with non-zero code if python.app fails, but conda itself may still be installed
     set +e
     bash "$INSTALL_DIR/$MINICONDA_INSTALLER" -b -p "$CONDA_ROOT_PREFIX" -u
     INSTALLER_EXIT_CODE=$?
     set -e
-    
-    # Note: INSTALLER_EXIT_CODE may be non-zero if python.app fails, but this is expected on macOS
+
     # We'll check if conda actually exists rather than relying on exit code
+
     
     # Wait a moment for file system to sync
     echo "Waiting for installation to complete..."
@@ -194,7 +175,7 @@ if [ "$CONDA_EXISTS" == "F" ] || [ "$CONDA_BASE_CORRUPTED" == "T" ]; then
     
     if [ -z "$CONDA_BIN" ] || [ ! -f "$CONDA_BIN" ]; then
         echo "WARNING: Conda binary not found in standard locations after installation."
-        echo "This may happen if python.app installation failed (expected on macOS)."
+        echo "This may happen if the installation was interrupted."
         echo ""
         echo "Searching for conda in installation directory..."
         local found_condas=$(find "$CONDA_ROOT_PREFIX" -name "conda" -type f 2>/dev/null | head -5)
@@ -241,7 +222,7 @@ if [ "$CONDA_EXISTS" == "F" ] || [ "$CONDA_BASE_CORRUPTED" == "T" ]; then
                         # Re-run the installer in update mode (-u flag) to complete the installation
                         # This will install conda properly without the temporary path issue
                         set +e
-                        bash "$INSTALL_DIR/$MINICONDA_INSTALLER" -b -p "$CONDA_ROOT_PREFIX" -u 2>&1 | grep -v "python.app" || true
+                        bash "$INSTALL_DIR/$MINICONDA_INSTALLER" -b -p "$CONDA_ROOT_PREFIX" -u || true
                         set -e
                         sleep 5
                         

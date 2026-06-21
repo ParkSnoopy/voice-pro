@@ -1,4 +1,6 @@
-import sys, os, multiprocessing
+import sys
+import os
+import multiprocessing
 from scipy import signal
 
 now_dir = os.getcwd()
@@ -9,11 +11,12 @@ sr = int(sys.argv[2])
 n_p = int(sys.argv[3])
 exp_dir = sys.argv[4]
 noparallel = sys.argv[5] == "True"
-import numpy as np, os, traceback
+import numpy as np
+import os
+import traceback
 from slicer2 import Slicer
-import librosa, traceback
+import librosa
 from scipy.io import wavfile
-import multiprocessing
 from my_utils import load_audio
 import tqdm
 

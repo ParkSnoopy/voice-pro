@@ -52,7 +52,7 @@ uuid
 pydub==0.25.1
 pyworld==0.3.4
 f5-tts==1.0.8
-# PyTorch 2.5.1 - installed via conda on macOS, via pip on Linux/Windows
+# PyTorch 2.5.1 - installed via pip on Linux
 # torch==2.5.1
 # torchvision==0.20.1
 # torchaudio==2.5.1

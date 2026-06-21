@@ -6,7 +6,7 @@
     version: 2.0.0
     last-updated: 2025-02-23
     product-type: AI多媒体处理软件
-    platforms: Windows
+    platforms: Linux
     technology-stack: Whisper, Edge-TTS, Gradio, CUDA, Faster-Whisper, Whisper-Timestamped, WhisperX, E2-TTS, F5-TTS, YouTube Downloader, Demucs, MDX-Net, RVC, CosyVoice, kokoro
     license: LGPL
 -->
@@ -86,9 +86,9 @@ Voice-Pro是一款革新多媒体内容制作的先进网页应用。它将YouTu
 ## ⚠️ 请注意
 - 由于[WeConnect](https://www.wctokyoseoul.com)开发工作，Voice-Pro的开发和更新暂时无法进行。
 - 我们已经公开了所有Voice-Pro代码并完全免费。Voice-Pro现在可以自由分发和修改。
-- 在配备NVIDIA GPU的Windows环境下运行良好。Mac和Linux上的运行尚未验证。
+- 以配备NVIDIA GPU的Linux环境为目标平台。
 - 请将您的请求留在 [![GitHub Issues](https://img.shields.io/github/issues/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/issues)  或 [![GitHub Discussions](https://img.shields.io/github/discussions/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/discussions)  页面。
-- **故障排除**: 在大多数情况下，删除`installer_files`文件夹，然后依次运行`configure.bat`和`start.bat`即可解决问题。
+- **故障排除**: 在大多数情况下，删除`installer_files`文件夹，然后依次运行`configure.sh`和`start.sh`即可解决问题。
 
 
 
@@ -99,7 +99,7 @@ Voice-Pro是一款革新多媒体内容制作的先进网页应用。它将YouTu
 
 - 我们过去几个月一直专注于[WeConnect](https://www.wctokyoseoul.com)开发，完全无法管理Voice-Pro。 
 - 我们决定开源所有Voice-Pro代码。
-- Voice-Pro完全免费，支持Windows、Mac、Linux。
+- Voice-Pro完全免费，支持Linux。
 - [WeConnect](https://www.wctokyoseoul.com)是一个用于全球文化交流的应用程序。
 - 与世界各地的 人们 连接，进行有意义的文化交流、语言学习和国际友谊。
 
@@ -403,7 +403,7 @@ Japanese
 
 
 ## 💻 系统要求
-- **操作系统：** Windows 10/11（64位）、Linux、Mac
+- **操作系统：** Linux（64位）
 - **显卡：** 支持CUDA 12.4的NVIDIA显卡（推荐）
 - **显存：** 4GB以上（推荐8GB以上）
 - **内存：** 4GB以上
@@ -412,7 +412,7 @@ Japanese
 
 ## 📀 安装
 
-使用**configure.bat**和**start.bat**轻松安装Voice-Pro（Mac/Linux上使用configure.sh和start.sh）。
+使用**configure.sh**和**start.sh**轻松安装Voice-Pro。
 
 ### 1. 准备包
 - 从[![GitHub Release](https://img.shields.io/github/v/release/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/)下载最新发布版本（**Source code (zip)**）
@@ -421,29 +421,29 @@ git clone https://github.com/abus-aikorea/voice-pro.git
 ```
 
 ### 2. 安装和运行
-1. 🚀 **configure.bat**
+1. 🚀 **configure.sh**
    - 安装git、ffmpeg、CUDA（使用NVIDIA GPU时）
    - 首次运行一次；需要网络，可能需要1小时以上
    - 不要关闭命令窗口
-2. 🚀 **start.bat**
+2. 🚀 **start.sh**
    - 运行Voice-Pro网页界面
    - 首次运行时安装依赖（可能需要1小时以上）
    - 如果出现问题，删除**installer_files**后重新运行
 
 ### 3. 更新
-- 🚀 **update.bat**：更新Python环境（比重新安装更快）
+- 🚀 **update.sh**：更新Python环境（比重新安装更快）
 
 ### 4. 卸载
-- 运行**uninstall.bat**或删除文件夹（便携式安装）
+- 运行**uninstall.sh**或删除文件夹（便携式安装）
 
 ## ❓使用技巧
 
 #### 浏览器没有自动启动时
-- 关闭Windows命令窗口，重新运行start.bat，或
-- 直接启动浏览器，在地址栏输入Windows命令窗口显示的地址（例如**http://127.0.0.1:7870**）
+- 关闭终端，重新运行start.sh，或
+- 直接启动浏览器，在地址栏输入终端显示的地址（例如**http://127.0.0.1:7870**）
 
 #### 出现CUDA内存不足错误时
-- 在Windows任务管理器-性能标签中检查GPU内存状态
+- 在系统监视器-性能标签中检查GPU内存状态
 - 将降噪级别设置为0或1。降噪级别2需要8GB以上的GPU内存
 - 将计算类型设置为int类型。float类型质量更好但需要更多GPU内存
 
