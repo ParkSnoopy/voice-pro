@@ -74,6 +74,9 @@ class YoutubeDownloader:
         maxDuration: int = None,
     ):
         ydl_opts = {}
+        cache_dir = os.path.join(os.getcwd(), "installer_files", "yt-dlp-cache")
+        os.makedirs(cache_dir, exist_ok=True)
+        ydl_opts["cachedir"] = cache_dir
         ydl_opts["keepvideo"] = False
         ydl_opts["progress_hooks"] = [self.dl_progress_hook]
         ydl_opts["playlist_items"] = "1"

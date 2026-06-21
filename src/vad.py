@@ -1,7 +1,7 @@
 # original: https://github.com/snakers4/silero-vad/blob/master/utils_vad.py
 
 import os
-import subprocess
+import urllib.request
 import torch
 import numpy as np
 import onnxruntime
@@ -115,9 +115,9 @@ class VoiceActivityDetection:
 
     @staticmethod
     def download(
-        model_url="https://github.com/snakers4/silero-vad/blob/master/files/silero_vad.onnx",
+        model_url="https://raw.githubusercontent.com/snakers4/silero-vad/master/files/silero_vad.onnx",
     ):
-        target_dir = os.path.expanduser("~/.cache/whisper-live/")
+        target_dir = os.path.join(os.getcwd(), "model", "vad")
 
         # Ensure the target directory exists
         os.makedirs(target_dir, exist_ok=True)
@@ -127,12 +127,12 @@ class VoiceActivityDetection:
 
         # Check if the model file already exists
         if not os.path.exists(model_filename):
-            # If it doesn't exist, download the model using wget
+            # If it doesn't exist, download directly to the project model dir.
             try:
-                print("Start to download the model using wget.")
-                subprocess.run(["wget", "-O", model_filename, model_url], check=True)
-            except subprocess.CalledProcessError:
-                print("Failed to download the model using wget.")
+                print("Start to download the Silero VAD model.")
+                urllib.request.urlretrieve(model_url, model_filename)
+            except Exception as e:
+                print(f"Failed to download the Silero VAD model: {e}")
         return model_filename
 
 

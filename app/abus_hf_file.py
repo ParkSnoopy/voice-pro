@@ -2,7 +2,6 @@ import os
 import zipfile
 import shutil
 
-from pathlib import Path
 from huggingface_hub import hf_hub_download
 
 from app.abus_path import *
@@ -53,7 +52,9 @@ class HF_File:
 
     def download(self, force_download: bool = False):
         try:
-            cache_dir = os.path.join(Path.home(), ".cache", "huggingface", "hub")
+            cache_dir = os.environ.get(
+                "HF_HUB_CACHE", os.path.join(os.getcwd(), "model", ".hf_cache", "hub")
+            )
             hf_download_path = hf_hub_download(
                 repo_id=self.repo_id,
                 filename=self.file_name,
@@ -121,7 +122,9 @@ class HF_File:
     def download_private(self, token, force_download: bool = False):
         try:
             # logger.warning(f'[abus_hf_file.py] download_private - start download : {self.file_name}')
-            cache_dir = os.path.join(Path.home(), ".cache", "huggingface", "hub")
+            cache_dir = os.environ.get(
+                "HF_HUB_CACHE", os.path.join(os.getcwd(), "model", ".hf_cache", "hub")
+            )
             hf_download_path = hf_hub_download(
                 repo_id=self.repo_id,
                 filename=self.file_name,

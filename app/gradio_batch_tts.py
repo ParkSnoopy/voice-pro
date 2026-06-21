@@ -162,6 +162,11 @@ class GradioBatchTTS:
         if os.path.exists(source_file) == False:
             return None
 
+        workspace_folder = path_workspace_subfolder(source_file)
+        source_file = cmd_copy_file_to(source_file, workspace_folder)
+        if not source_file or os.path.exists(source_file) == False:
+            return None
+
         fm = FileManager()
         fm.set_split("Source", source_file)
 

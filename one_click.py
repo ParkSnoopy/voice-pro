@@ -8,15 +8,54 @@ import time
 
 
 class OneClick:
-    script_dir = os.getcwd()
+    script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    conda_root_prefix = os.environ.get(
-        "CONDA_ROOT_PREFIX", os.path.join(script_dir, "installer_files", "conda")
-    )
-    conda_env_path = os.environ.get(
+    env_path = os.environ.get(
         "INSTALL_ENV_DIR", os.path.join(script_dir, "installer_files", "env")
     )
     app_model_path = os.path.join(script_dir, "model")
+
+    @classmethod
+    def configure_runtime_paths(cls):
+        install_dir = os.path.join(cls.script_dir, "installer_files")
+        temp_dir = os.path.join(install_dir, "tmp")
+        hf_home = os.path.join(cls.app_model_path, ".hf_cache")
+        hf_hub_cache = os.path.join(hf_home, "hub")
+        runtime_env = {
+            "HOME": os.path.join(install_dir, "home"),
+            "TMP": temp_dir,
+            "TEMP": temp_dir,
+            "TMPDIR": temp_dir,
+            "XDG_CACHE_HOME": os.path.join(install_dir, "xdg-cache"),
+            "XDG_CONFIG_HOME": os.path.join(install_dir, "xdg-config"),
+            "XDG_DATA_HOME": os.path.join(install_dir, "xdg-data"),
+            "XDG_STATE_HOME": os.path.join(install_dir, "xdg-state"),
+            "GRADIO_TEMP_DIR": os.path.join(install_dir, "gradio"),
+            "STANZA_RESOURCES_DIR": os.path.join(cls.app_model_path, "stanza"),
+            "HF_HOME": hf_home,
+            "HF_HUB_CACHE": hf_hub_cache,
+            "HUGGINGFACE_HUB_CACHE": hf_hub_cache,
+            "TRANSFORMERS_CACHE": hf_hub_cache,
+            "MODELSCOPE_CACHE": os.path.join(cls.app_model_path, ".modelscope_cache"),
+            "UV_CACHE_DIR": os.path.join(install_dir, "uv-cache"),
+            "PIP_CACHE_DIR": os.path.join(install_dir, "uv-cache"),
+            "UV_PYTHON_INSTALL_DIR": os.path.join(install_dir, "uv-python"),
+            "MPLCONFIGDIR": os.path.join(install_dir, "matplotlib"),
+            "TORCH_HOME": os.path.join(cls.app_model_path, ".torch"),
+            "TORCH_EXTENSIONS_DIR": os.path.join(
+                cls.app_model_path, ".torch_extensions"
+            ),
+            "CACHED_PATH_CACHE_DIR": os.path.join(cls.app_model_path, ".cached_path"),
+            "NUMBA_CACHE_DIR": os.path.join(install_dir, "numba-cache"),
+            "TRITON_CACHE_DIR": os.path.join(cls.app_model_path, ".triton"),
+            "CUDA_CACHE_PATH": os.path.join(
+                cls.app_model_path, ".nv", "ComputeCache"
+            ),
+        }
+        os.environ.update(runtime_env)
+        for path in set(runtime_env.values()):
+            if os.path.isabs(path) or path.startswith(cls.script_dir):
+                os.makedirs(path, exist_ok=True)
 
     print("Info: Start 1-click ...")
 
@@ -32,7 +71,7 @@ class OneClick:
     def torch_version(cls):
         site_packages_path = None
         for sitedir in site.getsitepackages():
-            if "site-packages" in sitedir and cls.conda_env_path in sitedir:
+            if "site-packages" in sitedir and cls.env_path in sitedir:
                 site_packages_path = sitedir
                 break
 
@@ -61,9 +100,9 @@ class OneClick:
         is_cuda = "+cu" in torver if torver else False
 
         if is_cuda:
-            install_pytorch = "python -m pip install --upgrade torch==2.5.1+cu124 torchvision==0.20.1+cu124 torchaudio==2.5.1+cu124 --extra-index-url https://download.pytorch.org/whl/cu124"
+            install_pytorch = "uv pip install --upgrade torch==2.5.1+cu124 torchvision==0.20.1+cu124 torchaudio==2.5.1+cu124 --extra-index-url https://download.pytorch.org/whl/cu124"
         else:
-            install_pytorch = "python -m pip install --upgrade torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1"
+            install_pytorch = "uv pip install --upgrade torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1"
 
         cls.oc_run_cmd(f"{install_pytorch}", assert_success=True, environment=True)
 
@@ -72,7 +111,7 @@ class OneClick:
         # Check if key packages are installed to verify installation is complete
         site_packages_path = None
         for sitedir in site.getsitepackages():
-            if "site-packages" in sitedir and cls.conda_env_path in sitedir:
+            if "site-packages" in sitedir and cls.env_path in sitedir:
                 site_packages_path = sitedir
                 break
 
@@ -95,35 +134,21 @@ class OneClick:
             # Additional check: Try to actually import torch to verify it works
             # This catches cases where torch is installed but broken
             try:
-                # Use a clean environment to test import
                 test_cmd = "python -c \"import sys; sys.path.insert(0, ''); import torch; assert hasattr(torch, '_C') or hasattr(torch, '__version__')\""
                 return cls.oc_run_cmd(test_cmd, environment=True, capture_output=True)
             except:
-                # If import test fails, assume not properly installed
                 return False
         else:
-            # If environment doesn't exist, definitely not installed
             return False
 
     @classmethod
     def oc_check_env(cls):
-        # If we have access to conda, we are probably in an environment
-        conda_exist = cls.oc_run_cmd("conda", environment=True, capture_output=True)
-        if not conda_exist:
-            print("Error: Conda is not installed. Exiting...")
+        os.chdir(cls.script_dir)
+        cls.configure_runtime_paths()
+        # Verify a virtual environment is active
+        if not os.environ.get("VIRTUAL_ENV"):
+            print("Error: No virtual environment active. Run start.sh first. Exiting...")
             sys.exit(1)
-
-        # Ensure this is a new environment and not the base environment
-        if os.environ.get("CONDA_DEFAULT_ENV") == "base":
-            print(
-                "Error: Create an environment for this project and activate it. Exiting..."
-            )
-            sys.exit(1)
-
-        # Workaround for llama-cpp-python loading paths in CUDA env vars even if they do not exist
-        conda_path_bin = os.path.join(cls.conda_env_path, "bin")
-        if not os.path.exists(conda_path_bin):
-            os.makedirs(conda_path_bin, exist_ok=True)
 
         # Check if we're in a PyTorch source directory (can cause import issues)
         current_dir = os.getcwd()
@@ -161,8 +186,7 @@ class OneClick:
     @classmethod
     def clear_cache(cls):
         print("clear_cache?? no...")
-        # oc_run_cmd("conda clean -a -y", environment=True)
-        # oc_run_cmd("python -m pip cache purge", environment=True)
+        # uv cache prune
 
     @classmethod
     def oc_print_big_message(cls, message):
@@ -183,25 +207,20 @@ class OneClick:
         capture_output=False,
         env=None,
     ):
-        # Use the conda environment
-        if environment:
-            conda_sh_path = os.path.join(
-                cls.conda_root_prefix, "etc", "profile.d", "conda.sh"
-            )
-            if not os.path.exists(conda_sh_path):
-                print(f"Warning: Conda shell script not found at {conda_sh_path}")
-                return False
-            cmd = (
-                f'. "{conda_sh_path}" && conda activate "{cls.conda_env_path}" && {cmd}'
-            )
-
-        # Run shell commands
+        # venv is already activated by start.sh; environment flag is a no-op kept for compat
+        cls.configure_runtime_paths()
+        process_env = os.environ.copy()
+        if env:
+            process_env.update(env)
         try:
             result = subprocess.run(
-                cmd, shell=True, capture_output=capture_output, env=env
+                cmd,
+                shell=True,
+                capture_output=capture_output,
+                env=process_env,
+                cwd=cls.script_dir,
             )
 
-            # Assert the command ran successfully
             if assert_success and result.returncode != 0:
                 print(
                     f"Command '{cmd}' failed with exit status code '{str(result.returncode)}'.\n\nExiting now.\nTry running the start/update script again."
@@ -244,39 +263,25 @@ class OneClick:
                 "What is your GPU?",
                 {
                     "G": "NVIDIA GTX, RTX, Tesla",
-                    # 'B': 'Intel Arc (IPEX)',
                     "C": "CPU (I want to run models in CPU mode)",
                 },
             )
 
         gpu_choice_to_name = {
             "G": "NVIDIA",
-            # "B": "INTEL",
             "C": "CPU",
         }
 
         selected_gpu = gpu_choice_to_name[choice]
 
-        # pip 버전이 24.1 이상인 경우,
-        # omegaconf 를 시작으로 fairseq 0.12.2, hydra-core 1.0.7  설치 문제가 발생하기 때문에
-        # pip 버전을 24.0 으로 설정함.
-        # oc_run_cmd("python -m pip install pip==24.0", assert_success=True, environment=True)
-        cls.oc_run_cmd(
-            "python -m pip install pip==25.0", assert_success=True, environment=True
-        )
-
-        # conda package
-        cls.install_conda_packages(app_name, selected_gpu)
+        # Install build tools (ninja) via uv pip
+        cls.install_build_tools()
 
         if is_update:
             cls.update_pytorch()
 
         # Install the webui requirements
         cls.install_requirements(app_name, is_update, selected_gpu)
-
-        # cudnn & onnxruntime
-        # install_cudnn()
-        # install_onnxruntime()
 
         cls.clear_cache()
 
@@ -299,141 +304,39 @@ class OneClick:
             f"Install/Update webui requirements from file: {requirements_file}"
         )
 
-        cmd = f"python -m pip install -r {requirements_file}"
+        cmd = f"uv pip install -r {requirements_file}"
         cmd = cmd + " --upgrade" if is_update else cmd
         cls.oc_run_cmd(cmd, assert_success=True, environment=True)
 
         # Install PyTorch via pip for CPU builds
         if selected_gpu == "CPU":
             if not cls.check_package_installed("torch"):
-                cls.oc_print_big_message("Installing PyTorch via pip")
+                cls.oc_print_big_message("Installing PyTorch via uv pip")
                 cls.oc_run_cmd(
-                    "python -m pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1",
+                    "uv pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1",
                     assert_success=True,
                     environment=True,
                 )
 
     @classmethod
-    def install_conda_packages(cls, app_name, selected_gpu="NVIDIA"):
-        # Configure conda channels first (recommended by Anaconda documentation)
-        # Reference: https://www.anaconda.com/docs/getting-started/miniconda/install#linux-2
-        cls.oc_print_big_message("Configuring conda channels")
-
-        # Add conda-forge channel (idempotent operation)
-        # The command will fail if channel already exists, which is fine
-        print("Adding conda-forge channel...")
-        cls.oc_run_cmd(
-            "conda config --add channels conda-forge 2>&1 | grep -v 'already exists' || true",
-            environment=True,
-        )
-
-        # Set channel priority to flexible (allows packages from multiple channels)
-        # This is recommended for better package resolution
-        print("Setting channel priority to flexible...")
-        cls.oc_run_cmd("conda config --set channel_priority flexible", environment=True)
-
-        # Verify channel configuration
-        print("Verifying channel configuration...")
-        cls.oc_run_cmd("conda config --show channels", environment=True)
-
-        if app_name in ["gulliver", "voice"]:
-            if cls.check_package_installed("pynini") == False:
-                cls.oc_print_big_message("Installing pynini from conda-forge")
-                # Retry logic for network issues
-                max_retries = 3
-                retry_count = 0
-                success = False
-                while retry_count < max_retries and not success:
-                    if retry_count > 0:
-                        print(
-                            f"Retrying pynini installation (attempt {retry_count + 1}/{max_retries})..."
-                        )
-                        time.sleep(5)  # Wait before retry
-
-                    # Try installing with explicit channel specification
-                    # Use --strict-channel-priority to ensure we get from conda-forge
-                    success = cls.oc_run_cmd(
-                        "conda install -y -c conda-forge --strict-channel-priority pynini==2.1.5",
-                        assert_success=False,
-                        environment=True,
-                    )
-
-                    if not success:
-                        # Try without strict priority (more flexible)
-                        print("Trying with flexible channel priority...")
-                        success = cls.oc_run_cmd(
-                            "conda install -y -c conda-forge pynini==2.1.5",
-                            assert_success=False,
-                            environment=True,
-                        )
-
-                    if not success:
-                        # Try alternative: use defaults channel as fallback
-                        print(
-                            "Trying alternative installation method (defaults channel)..."
-                        )
-                        success = cls.oc_run_cmd(
-                            "conda install -y pynini==2.1.5",
-                            assert_success=False,
-                            environment=True,
-                        )
-
-                    retry_count += 1
-
-                if not success:
-                    print("ERROR: Failed to install pynini after multiple attempts.")
-                    print(
-                        "This may be due to network issues. Please check your internet connection."
-                    )
-                    print("You can try installing manually:")
-                    print("  conda install -y -c conda-forge pynini==2.1.5")
-                    sys.exit(1)
-
-        # Install ninja and git with retry logic
-        print("Installing ninja and git...")
+    def install_build_tools(cls):
+        cls.oc_print_big_message("Installing build tools (ninja)")
         max_retries = 3
         retry_count = 0
         success = False
         while retry_count < max_retries and not success:
             if retry_count > 0:
                 print(
-                    f"Retrying ninja/git installation (attempt {retry_count + 1}/{max_retries})..."
+                    f"Retrying ninja installation (attempt {retry_count + 1}/{max_retries})..."
                 )
                 time.sleep(5)
             success = cls.oc_run_cmd(
-                "conda install -y -k ninja git", assert_success=False, environment=True
+                "uv pip install ninja", assert_success=False, environment=True
             )
             retry_count += 1
 
         if not success:
-            print("WARNING: Failed to install ninja/git. Continuing anyway...")
-
-        # Remove nomkl and install mkl
-        # nomkl may not be installed, so don't fail if it's not found
-        print("Removing nomkl (if present)...")
-        cls.oc_run_cmd(
-            "conda remove --force --yes nomkl 2>&1 || true", environment=True
-        )
-
-        # Install mkl with retry logic
-        max_retries = 3
-        retry_count = 0
-        success = False
-        while retry_count < max_retries and not success:
-            if retry_count > 0:
-                print(
-                    f"Retrying mkl installation (attempt {retry_count + 1}/{max_retries})..."
-                )
-                time.sleep(5)
-            success = cls.oc_run_cmd(
-                "conda install --yes mkl -c anaconda",
-                assert_success=False,
-                environment=True,
-            )
-            retry_count += 1
-
-        if not success:
-            print("WARNING: Failed to install mkl. Continuing anyway...")
+            print("WARNING: Failed to install ninja. Continuing anyway...")
 
     @classmethod
     def launch_webui(cls, app_file):

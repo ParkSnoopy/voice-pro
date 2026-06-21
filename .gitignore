@@ -194,3 +194,13 @@ model/f5-tts/voice_15s.zip
 /model/kokoro
 /model/edge-tts
 /model/cosyvoice
+
+/model/vad
+/model/stanza
+/model/.hf_cache
+/model/.modelscope_cache
+/model/.torch
+/model/.torch_extensions
+/model/.cached_path
+/model/.triton
+/model/.nv

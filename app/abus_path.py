@@ -149,16 +149,6 @@ def path_new_filename(ext: str = ".wav", format: str = "%Y%m%d-%H%M%S"):
     return filename
 
 
-# def path_cache_folder(title: str = "abus"):
-#     return os.path.join(Path.home(), ".cache", title)
-
-# def path_appdata_roaming_folder(title: str = "aicover"):
-#     return os.path.join(os.getenv('APPDATA'), "ABUS", title)
-
-# def path_appdata_local_temp_folder(title: str = ""):
-#     return os.path.join(os.getenv('LOCALAPPDATA'), "Temp", title)
-
-
 def path_subfolders(folder_path: str):
     directories = []
     if not os.path.exists(folder_path):
