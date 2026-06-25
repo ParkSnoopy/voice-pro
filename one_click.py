@@ -1,10 +1,9 @@
+import hashlib
 import os
 import platform
 import site
 import subprocess
 import sys
-import importlib
-import time
 
 
 class OneClick:
@@ -35,11 +34,11 @@ class OneClick:
             "HF_HOME": hf_home,
             "HF_HUB_CACHE": hf_hub_cache,
             "HUGGINGFACE_HUB_CACHE": hf_hub_cache,
-            "TRANSFORMERS_CACHE": hf_hub_cache,
             "MODELSCOPE_CACHE": os.path.join(cls.app_model_path, ".modelscope_cache"),
             "UV_CACHE_DIR": os.path.join(install_dir, "uv-cache"),
             "PIP_CACHE_DIR": os.path.join(install_dir, "uv-cache"),
             "UV_PYTHON_INSTALL_DIR": os.path.join(install_dir, "uv-python"),
+            "UV_TORCH_BACKEND": "cpu",
             "MPLCONFIGDIR": os.path.join(install_dir, "matplotlib"),
             "TORCH_HOME": os.path.join(cls.app_model_path, ".torch"),
             "TORCH_EXTENSIONS_DIR": os.path.join(
@@ -48,9 +47,6 @@ class OneClick:
             "CACHED_PATH_CACHE_DIR": os.path.join(cls.app_model_path, ".cached_path"),
             "NUMBA_CACHE_DIR": os.path.join(install_dir, "numba-cache"),
             "TRITON_CACHE_DIR": os.path.join(cls.app_model_path, ".triton"),
-            "CUDA_CACHE_PATH": os.path.join(
-                cls.app_model_path, ".nv", "ComputeCache"
-            ),
         }
         os.environ.update(runtime_env)
         for path in set(runtime_env.values()):
@@ -58,6 +54,36 @@ class OneClick:
                 os.makedirs(path, exist_ok=True)
 
     print("Info: Start 1-click ...")
+
+    @classmethod
+    def dependency_state_path(cls):
+        return os.path.join(cls.env_path, ".voice-pro-deps.sha256")
+
+    @classmethod
+    def dependency_state_hash(cls):
+        digest = hashlib.sha256()
+        for filename in ("pyproject.toml", "uv.lock"):
+            path = os.path.join(cls.script_dir, filename)
+            with open(path, "rb") as f:
+                digest.update(filename.encode("utf-8"))
+                digest.update(b"\0")
+                digest.update(f.read())
+                digest.update(b"\0")
+        return digest.hexdigest()
+
+    @classmethod
+    def dependencies_are_current(cls):
+        try:
+            with open(cls.dependency_state_path(), "r", encoding="utf-8") as f:
+                return f.read().strip() == cls.dependency_state_hash()
+        except OSError:
+            return False
+
+    @classmethod
+    def mark_dependencies_current(cls):
+        os.makedirs(cls.env_path, exist_ok=True)
+        with open(cls.dependency_state_path(), "w", encoding="utf-8") as f:
+            f.write(cls.dependency_state_hash() + "\n")
 
     @classmethod
     def is_linux(cls):
@@ -93,21 +119,12 @@ class OneClick:
 
         return torver
 
-    @classmethod
-    def update_pytorch(cls):
-        cls.oc_print_big_message("Checking for PyTorch updates")
-        torver = cls.torch_version()
-        is_cuda = "+cu" in torver if torver else False
-
-        if is_cuda:
-            install_pytorch = "uv pip install --upgrade torch==2.5.1+cu124 torchvision==0.20.1+cu124 torchaudio==2.5.1+cu124 --extra-index-url https://download.pytorch.org/whl/cu124"
-        else:
-            install_pytorch = "uv pip install --upgrade torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1"
-
-        cls.oc_run_cmd(f"{install_pytorch}", assert_success=True, environment=True)
 
     @classmethod
     def oc_is_installed(cls):
+        if not cls.dependencies_are_current():
+            return False
+
         # Check if key packages are installed to verify installation is complete
         site_packages_path = None
         for sitedir in site.getsitepackages():
@@ -232,111 +249,26 @@ class OneClick:
             print(f"Command: '{cmd}' failed with {e}")
             return False
 
-    @classmethod
-    def get_user_choice(cls, question, options_dict):
-        print()
-        print(question)
-        print()
-
-        for key, value in options_dict.items():
-            print(f"{key}) {value}")
-
-        print()
-
-        choice = input("Input> ").upper()
-        while choice not in options_dict.keys():
-            print("Invalid choice. Please try again.")
-            choice = input("Input> ").upper()
-
-        return choice
 
     @classmethod
     def oc_install_webui(cls, app_name: str, is_update=False):
-        # Ask the user for the GPU vendor
-        if "GPU_CHOICE" in os.environ:
-            choice = os.environ["GPU_CHOICE"].upper()
-            cls.oc_print_big_message(
-                f'Selected GPU choice "{choice}" based on the GPU_CHOICE environment variable.'
-            )
-        else:
-            choice = cls.get_user_choice(
-                "What is your GPU?",
-                {
-                    "G": "NVIDIA GTX, RTX, Tesla",
-                    "C": "CPU (I want to run models in CPU mode)",
-                },
-            )
-
-        gpu_choice_to_name = {
-            "G": "NVIDIA",
-            "C": "CPU",
-        }
-
-        selected_gpu = gpu_choice_to_name[choice]
-
-        # Install build tools (ninja) via uv pip
-        cls.install_build_tools()
-
-        if is_update:
-            cls.update_pytorch()
-
-        # Install the webui requirements
-        cls.install_requirements(app_name, is_update, selected_gpu)
-
+        cls.sync_project_dependencies(app_name, is_update)
         cls.clear_cache()
 
-    @classmethod
-    def check_package_installed(cls, package_name):
-        try:
-            importlib.import_module(package_name)
-            return True
-        except ImportError:
-            return False
 
     @classmethod
-    def install_requirements(cls, app_name, is_update=False, selected_gpu="NVIDIA"):
-        requirements_file = (
-            f"requirements-{app_name}-gpu.txt"
-            if selected_gpu == "NVIDIA"
-            else f"requirements-{app_name}-cpu.txt"
-        )
+    def sync_project_dependencies(cls, app_name, is_update=False):
         cls.oc_print_big_message(
-            f"Install/Update webui requirements from file: {requirements_file}"
+            f"Sync uv project dependencies from uv.lock for app: {app_name}"
         )
 
-        cmd = f"uv pip install -r {requirements_file}"
-        cmd = cmd + " --upgrade" if is_update else cmd
-        cls.oc_run_cmd(cmd, assert_success=True, environment=True)
+        cls.oc_run_cmd(
+            "uv sync --active --no-dev --locked",
+            assert_success=True,
+            environment=True,
+        )
+        cls.mark_dependencies_current()
 
-        # Install PyTorch via pip for CPU builds
-        if selected_gpu == "CPU":
-            if not cls.check_package_installed("torch"):
-                cls.oc_print_big_message("Installing PyTorch via uv pip")
-                cls.oc_run_cmd(
-                    "uv pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1",
-                    assert_success=True,
-                    environment=True,
-                )
-
-    @classmethod
-    def install_build_tools(cls):
-        cls.oc_print_big_message("Installing build tools (ninja)")
-        max_retries = 3
-        retry_count = 0
-        success = False
-        while retry_count < max_retries and not success:
-            if retry_count > 0:
-                print(
-                    f"Retrying ninja installation (attempt {retry_count + 1}/{max_retries})..."
-                )
-                time.sleep(5)
-            success = cls.oc_run_cmd(
-                "uv pip install ninja", assert_success=False, environment=True
-            )
-            retry_count += 1
-
-        if not success:
-            print("WARNING: Failed to install ninja. Continuing anyway...")
 
     @classmethod
     def launch_webui(cls, app_file):

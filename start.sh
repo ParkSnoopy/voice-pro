@@ -39,7 +39,7 @@ fi
 # Setup paths
 INSTALL_DIR="$SCRIPT_DIR/installer"
 INSTALL_ENV_DIR="$INSTALL_DIR/env"
-PYTHON_VERSION="3.10"
+PYTHON_VERSION="3.12"
 
 # Set temp/cache directories before uv runs
 export HOME="$INSTALL_DIR/home"
@@ -49,12 +49,11 @@ export TEMP="$TMPDIR"
 export UV_CACHE_DIR="$INSTALL_DIR/uv-cache"
 export PIP_CACHE_DIR="$INSTALL_DIR/uv-cache"
 export UV_PYTHON_INSTALL_DIR="$INSTALL_DIR/uv-python"
+export UV_TORCH_BACKEND=cpu
 mkdir -p "$HOME" "$TMPDIR" "$UV_CACHE_DIR" "$UV_PYTHON_INSTALL_DIR"
 
 # Create venv if needed
-ABUS_GENUINE_INSTALLED="T"
 if [ ! -d "$INSTALL_ENV_DIR" ]; then
-    ABUS_GENUINE_INSTALLED="F"
     echo "Creating uv virtual environment (Python $PYTHON_VERSION)..."
     uv venv "$INSTALL_ENV_DIR" --python "$PYTHON_VERSION" || (echo "venv creation failed." && exit 1)
 fi
@@ -69,11 +68,9 @@ fi
 export PYTHONNOUSERSITE=1
 export PYTHONPATH=
 export PYTHONHOME=
-export CUDA_PATH="$INSTALL_ENV_DIR"
-export CUDA_HOME="$CUDA_PATH"
 export VIRTUAL_ENV="$INSTALL_ENV_DIR"
 export UV_PROJECT_ENVIRONMENT="$INSTALL_ENV_DIR"
-# Keep all caches/temp inside the project dir; nothing leaks to ~, ~/.cache, ~/.config, ~/.local, ~/.nv, or /tmp
+# Keep all caches/temp inside the project dir; nothing leaks to ~, ~/.cache, ~/.config, ~/.local, or /tmp
 export HOME="$INSTALL_DIR/home"
 export TMPDIR="$INSTALL_DIR/tmp"
 export XDG_CACHE_HOME="$INSTALL_DIR/xdg-cache"
@@ -85,7 +82,6 @@ export STANZA_RESOURCES_DIR="$SCRIPT_DIR/model/stanza"
 export HF_HOME="$SCRIPT_DIR/model/.hf_cache"
 export HF_HUB_CACHE="$HF_HOME/hub"
 export HUGGINGFACE_HUB_CACHE="$HF_HUB_CACHE"
-export TRANSFORMERS_CACHE="$HF_HUB_CACHE"
 export MODELSCOPE_CACHE="$SCRIPT_DIR/model/.modelscope_cache"
 export UV_CACHE_DIR="$INSTALL_DIR/uv-cache"
 export PIP_CACHE_DIR="$INSTALL_DIR/uv-cache"
@@ -96,14 +92,13 @@ export TORCH_EXTENSIONS_DIR="$SCRIPT_DIR/model/.torch_extensions"
 export CACHED_PATH_CACHE_DIR="$SCRIPT_DIR/model/.cached_path"
 export NUMBA_CACHE_DIR="$INSTALL_DIR/numba-cache"
 export TRITON_CACHE_DIR="$SCRIPT_DIR/model/.triton"
-export CUDA_CACHE_PATH="$SCRIPT_DIR/model/.nv/ComputeCache"
 mkdir -p \
     "$HOME" "$TMPDIR" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" \
     "$XDG_STATE_HOME" "$GRADIO_TEMP_DIR" "$STANZA_RESOURCES_DIR" \
     "$HF_HOME" "$HF_HUB_CACHE" "$MODELSCOPE_CACHE" "$UV_CACHE_DIR" \
     "$PIP_CACHE_DIR" "$UV_PYTHON_INSTALL_DIR" "$MPLCONFIGDIR" "$TORCH_HOME" \
     "$TORCH_EXTENSIONS_DIR" "$CACHED_PATH_CACHE_DIR" "$NUMBA_CACHE_DIR" \
-    "$TRITON_CACHE_DIR" "$CUDA_CACHE_PATH"
+    "$TRITON_CACHE_DIR"
 
 # Activate venv
 source "$INSTALL_ENV_DIR/bin/activate"
@@ -112,16 +107,16 @@ source "$INSTALL_ENV_DIR/bin/activate"
 echo "Verifying Python installation..."
 PYTHON_BIN="$INSTALL_ENV_DIR/bin/python"
 if [ -f "$PYTHON_BIN" ]; then
-    if ! "$PYTHON_BIN" -c "import sys; import math; import os" 2>/dev/null; then
-        echo "Python installation appears incomplete or corrupted."
-        echo "Removing corrupted environment and recreating..."
+    if ! "$PYTHON_BIN" -c "import sys, math, os; expected = tuple(map(int, '$PYTHON_VERSION'.split('.')[:2])); raise SystemExit(0 if sys.version_info[:2] == expected else 1)" 2>/dev/null; then
+        echo "Python installation is incomplete, corrupted, or not Python $PYTHON_VERSION."
+        echo "Removing environment and recreating..."
         rm -rf "$INSTALL_ENV_DIR"
         uv venv "$INSTALL_ENV_DIR" --python "$PYTHON_VERSION" || (echo "venv creation failed." && exit 1)
         source "$INSTALL_ENV_DIR/bin/activate"
 
         # Verify again after recreation
         echo "Verifying recreated Python installation..."
-        if ! python -c "import sys; import math; import os" 2>/dev/null; then
+        if ! python -c "import sys, math, os; expected = tuple(map(int, '$PYTHON_VERSION'.split('.')[:2])); raise SystemExit(0 if sys.version_info[:2] == expected else 1)" 2>/dev/null; then
             echo "ERROR: Python installation is still broken after recreation."
             exit 1
         fi
@@ -138,9 +133,6 @@ fi
 echo "Virtual environment location: $INSTALL_ENV_DIR"
 cd "$SCRIPT_DIR"
 
-if [ "$ABUS_GENUINE_INSTALLED" == "F" ]; then
-    uv pip install huggingface-hub==0.27.1
-fi
 
 export LOG_LEVEL=DEBUG
 python start-abus.py voice

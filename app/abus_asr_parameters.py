@@ -11,7 +11,7 @@ class WhisperParameters:
     beam_size: int = 5  # 5 - default
     log_prob_threshold: float = -1.0  # -1.0 - default
     no_speech_threshold: float = 0.6  # 0.6 - default
-    compute_type: str = "default"  # 'int8_float16', 'float32', 'int8', 'int8_float32', 'float16', 'bfloat16', 'int8_bfloat16'
+    compute_type: str = "float32"  # CPU-safe default; CTranslate2 CPU types only.
     best_of: int = 5  # 5 - default
     patience: float = 2.0  # 1 - default
     condition_on_previous_text: bool = False  # True - default

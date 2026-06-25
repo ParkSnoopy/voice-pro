@@ -27,7 +27,7 @@ def rvc_change_voice(
     voice_pth_path = path_subfile(voice_model_folder, ".pth")
     voice_index_path = path_subfile(voice_model_folder, ".index")
 
-    device = "cuda:0"
+    device = "cpu"
     config = Config(device, False)
     hubert_model = load_hubert(
         device,

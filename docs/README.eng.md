@@ -7,7 +7,7 @@
     last-updated: 2025-02-23
     product-type: AI Multimedia Processing Software
     platforms: Linux
-    technology-stack: Whisper, Edge-TTS, Gradio, CUDA, Faster-Whisper, Whisper-Timestamped, WhisperX, E2-TTS, F5-TTS, YouTube Downloader, Demucs, MDX-Net, RVC, CosyVoice, kokoro
+    technology-stack: Whisper, Edge-TTS, Gradio, Faster-Whisper, Whisper-Timestamped, WhisperX, E2-TTS, F5-TTS, YouTube Downloader, Demucs, MDX-Net, RVC, CosyVoice, kokoro
     license: LGPL
 -->
 
@@ -89,7 +89,7 @@ A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developer
 ## ⚠️ Please Note
 - Due to [WeConnect](https://www.wctokyoseoul.com) development work, Voice-Pro development and updates are not possible for the time being.
 - We have made all Voice-Pro code open source and completely free. Voice-Pro can now be freely distributed and modified by anyone.
-- It targets Linux with NVIDIA GPU.
+- It targets Linux CPU-only systems.
 - Please leave your requests on the [![GitHub Issues](https://img.shields.io/github/issues/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/issues)  or  [![GitHub Discussions](https://img.shields.io/github/discussions/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/discussions) pages.
 - **Troubleshooting**: In most cases, issues can be resolved by deleting the `installer` folder and then running `configure.sh` followed by `start.sh`.
 
@@ -142,7 +142,7 @@ A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developer
 <details>
 <summary>version 2.0</summary>
 
-- 🐍 Built with Python 3.10.15, Torch 2.5.1+cu124, and Gradio 5.14.0.  
+- 🐍 Built with Python 3.12, Torch 2.8.0 CPU backend, and Gradio 5.14.0.
 - 🆓 Free trial supports media up to **60 seconds** in length.  
 - 🔥 Added the **AI Cover** feature.  
 - 🎤 Introduced support for **CosyVoice** and **kokoro**.  
@@ -206,7 +206,7 @@ A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developer
       <a href="https://youtu.be/HXomwoKS3V4" style="text-decoration: none; color: inherit;">
         <img src="https://img.youtube.com/vi/HXomwoKS3V4/hqdefault.jpg" alt="Demo Video 7" width="240" height="135" style="border-radius: 4px;">
         <br>
-        <span style="font-size: 16px; font-weight: 600; color: #0f0f0f; line-height: 1.2;">NVIDIA RTX Video Super-Resolution</span>
+        <span style="font-size: 16px; font-weight: 600; color: #0f0f0f; line-height: 1.2;">Demo Video 7</span>
       </a>
     </td>
     <td style="padding: 10px; border: none;" align="center">
@@ -414,8 +414,8 @@ Japanese
 
 ## 💻 System Requirements
 - **OS:** Linux (64-bit)
-- **GPU:** NVIDIA with CUDA 12.4 (recommended)
-- **VRAM:** 4GB+ (8GB+ preferred)
+- **Compute:** CPU-only
+- **Memory:** depends on the selected models and workflows
 - **RAM:** 4GB+
 - **Storage:** 20GB+ free space
 - **Internet:** Required
@@ -437,12 +437,12 @@ git clone https://github.com/abus-aikorea/voice-pro.git
 
 ### 2. Install & Run
 1. 🚀 **configure.sh**
-   - Sets up git, ffmpeg, and CUDA (if NVIDIA GPU)
+   - Sets up git and ffmpeg for the CPU install
    - Run once; takes 1+ hour with internet
    - Don’t close the command window
 2. 🚀 **start.sh**
    - Launches Voice-Pro WebUI
-   - First run installs dependencies (1+ hour)
+   - First run syncs the `pyproject.toml` / `uv.lock` project dependencies (1+ hour)
    - Retry after deleting **installer** if issues arise
 
 ### 3. Update
@@ -458,14 +458,14 @@ git clone https://github.com/abus-aikorea/voice-pro.git
 - Close the terminal and run start.sh again.
 - Run the browser directly and enter the address displayed in the terminal (e.g. **http://127.0.0.1:7870**) in the address bar.
 
-#### If a CUDA Out-Of-Memory error occurs
-- Check the GPU memory status in the system monitor - Performance tab. 
-- Set the Denoise level to 0 or 1. Denoise level 2 requires at least 8GB of GPU memory.
-- Set Compute Type to int type. The float type has better quality, but requires more GPU memory.
+#### If memory usage is high
+- Check system memory and close other heavy apps if needed.
+- Use smaller models for faster processing.
+- Shorter inputs generally process faster.
 
 #### How to improve the quality of subtitles?
 - The quality of subtitles tends to improve with larger Whisper models, but this is not necessarily the case. large > medium > small > base > tiny 
-- Among compute types, float type has good performance. The int type is a model that reduces GPU usage and increases speed through model quantization. On the other hand, performance decreases. 
+- Choose the model and denoise level based on the tradeoff you want between speed, memory use, and output quality.
 - If you increase the denoise level, more background sounds will be removed, and only the remaining voice will be used for voice recognition. It does not always guarantee good results.
   
 

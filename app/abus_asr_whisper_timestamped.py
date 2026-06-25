@@ -8,7 +8,6 @@ from typing import BinaryIO, Union, Tuple, List
 import whisper_timestamped
 import gc
 from whisper.utils import get_writer
-import torch
 import gradio as gr
 
 
@@ -43,18 +42,15 @@ class WhisperTimestampedInference:
         self.current_model_size = None
         self.model = None
         self.translatable_models = ["large", "large-v1", "large-v2", "large-v3"]
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.current_compute_type = "default"
+        self.device = "cpu"
+        self.current_compute_type = "float32"
 
     @staticmethod
-    def release_cuda_memory():
+    def release_memory():
         gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            torch.cuda.reset_max_memory_allocated()
-            logger.debug(
-                "[abus_asr_whisper_timestamped.py] release_cuda_memory - OK!! "
-            )
+        logger.debug(
+            "[abus_asr_whisper_timestamped.py] release_memory - OK!! "
+        )
 
     @staticmethod
     def remove_input_files(file_paths: List[str]):
@@ -89,7 +85,7 @@ class WhisperTimestampedInference:
             )
             return None, None
         finally:
-            self.release_cuda_memory()
+            self.release_memory()
 
     def transcribe_file(
         self,
@@ -115,7 +111,7 @@ class WhisperTimestampedInference:
             )
         finally:
             self.model = None
-            self.release_cuda_memory()
+            self.release_memory()
 
     def transcribe(
         self, audio: Union[str, BinaryIO, np.ndarray], params, progress: gr.Progress

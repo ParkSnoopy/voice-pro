@@ -13,7 +13,6 @@ import whisperx
 from whisperx.utils import get_writer
 import gc
 import ctranslate2
-import torch
 import gradio as gr
 
 from app.abus_path import *
@@ -45,20 +44,16 @@ class ProgressCapture(StringIO):
 
 class WhisperXInference:
     def __init__(self):
-
         self.current_model_size = None
         self.model = None
         self.translatable_models = ["large", "large-v1", "large-v2", "large-v3"]
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.current_compute_type = "default"
+        self.device = "cpu"
+        self.current_compute_type = "float32"
 
     @staticmethod
-    def release_cuda_memory():
+    def release_memory():
         gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            torch.cuda.reset_max_memory_allocated()
-            logger.debug("[abus_asr_whisperx.py] release_cuda_memory - OK!! ")
+        logger.debug("[abus_asr_whisperx.py] release_memory - OK!! ")
 
     @staticmethod
     def remove_input_files(file_paths: List[str]):
@@ -80,11 +75,7 @@ class WhisperXInference:
     @staticmethod
     def available_compute_types():
         types_orderd = []
-        types = None
-        if torch.cuda.is_available():
-            types = ctranslate2.get_supported_compute_types("cuda")
-        else:
-            types = ctranslate2.get_supported_compute_types("cpu")
+        types = ctranslate2.get_supported_compute_types("cpu")
 
         logger.debug(
             f"[abus_asr_whisperx.py] available_compute_types - types = {types} "
@@ -92,16 +83,10 @@ class WhisperXInference:
 
         if "float32" in types:
             types_orderd.append("float32")
-        if "float16" in types:
-            types_orderd.append("float16")
         if "int16_float32" in types:
             types_orderd.append("int16_float32")
-        if "int16_float16" in types:
-            types_orderd.append("int16_float16")
         if "int8_float32" in types:
             types_orderd.append("int8_float32")
-        if "int8_float16" in types:
-            types_orderd.append("int8_float16")
         if "int16" in types:
             types_orderd.append("int16")
         if "int8" in types:
@@ -125,7 +110,7 @@ class WhisperXInference:
             )
             return None, None
         finally:
-            self.release_cuda_memory()
+            self.release_memory()
 
     def transcribe_file(
         self,
@@ -146,7 +131,7 @@ class WhisperXInference:
             )
         finally:
             self.model = None
-            self.release_cuda_memory()
+            self.release_memory()
 
     def transcribe(
         self,
@@ -217,8 +202,15 @@ class WhisperXInference:
         if progress is not None:
             progress(0, desc="Initializing Model..")
 
+        available_compute_types = self.available_compute_types()
+        compute_type = params.compute_type
+        if compute_type not in available_compute_types:
+            compute_type = (
+                available_compute_types[0] if available_compute_types else "float32"
+            )
+
         self.current_model_size = params.model_size
-        self.current_compute_type = params.compute_type
+        self.current_compute_type = compute_type
 
         asr_options = {
             "beam_size": params.beam_size,
@@ -237,7 +229,7 @@ class WhisperXInference:
         self.model = whisperx.load_model(
             whisper_arch=params.model_size,
             device=self.device,
-            compute_type=params.compute_type,
+            compute_type=self.current_compute_type,
             download_root=os.path.join("model", "faster-whisper"),
             asr_options=asr_options,
         )

@@ -1,4 +1,5 @@
 import os
+import torch
 
 from app.abus_ffmpeg import *
 from app.abus_path import *
@@ -23,19 +24,10 @@ def run_mdx(
     keep_orig=True,
     m_threads=2,
 ):
-    if torch.cuda.is_available():
-        device = torch.device("cuda:0")
-        device_properties = torch.cuda.get_device_properties(device)
-        allocated_memory = torch.cuda.memory_allocated(device)
-        total_vram_gb = device_properties.total_memory / 1024**3
-        free_vram_gb = (device_properties.total_memory - allocated_memory) / 1024**3
-        m_threads = 1 if free_vram_gb < 10 else 2
-    else:
-        device = torch.device("cpu")
-        total_vram_gb = 0
-        free_vram_gb = 0
-        m_threads = 1
-
+    device = torch.device("cpu")
+    total_vram_gb = 0
+    free_vram_gb = 0
+    m_threads = 1
     logger.debug(f"run_mdx: device = {device}")
     logger.debug(
         f"run_mdx: total_vram_gb = {total_vram_gb}, free_vram_gb = {free_vram_gb} m_threads = {m_threads}"

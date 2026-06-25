@@ -73,12 +73,9 @@ class CosyVoiceInference:
         self.has_model, _ = CosyVoice2_05B.download(force_download=False)
 
     @staticmethod
-    def release_cuda_memory():
+    def release_memory():
         gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            torch.cuda.reset_max_memory_allocated()
-            logger.debug("[abus_tts_cosyvoice.py] release_cuda_memory - OK!! ")
+        logger.debug("[abus_tts_cosyvoice.py] release_memory - OK!! ")
 
     def set_random_seed(self):
         seed = random.randint(1, 100000000)
@@ -339,4 +336,4 @@ class CosyVoiceInference:
 
         # del self.ema_model
         # self.ema_model = None
-        self.release_cuda_memory()
+        self.release_memory()

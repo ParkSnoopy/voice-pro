@@ -1,9 +1,9 @@
 import pysubs2
 import re
+from pathlib import Path
 
 from pydub import AudioSegment
 import gradio as gr
-import torch
 import gc
 
 from app.abus_genuine import *
@@ -30,19 +30,6 @@ from f5_tts.infer.utils_infer import (
     infer_process,
 )
 
-try:
-    import spaces
-
-    USING_SPACES = True
-except ImportError:
-    USING_SPACES = False
-
-
-def gpu_decorator(func):
-    if USING_SPACES:
-        return spaces.GPU(func)
-    else:
-        return func
 
 
 class ModelPathManager:
@@ -127,14 +114,10 @@ class F5TTS:
             self.ema_model = self.load_f5tts(model_choice)
 
     @staticmethod
-    def release_cuda_memory():
+    def release_memory():
         gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            torch.cuda.reset_max_memory_allocated()
-            logger.debug("[abus_tts_f5.py] release_cuda_memory - OK!! ")
+        logger.debug("[abus_tts_f5.py] release_memory - OK!! ")
 
-    @gpu_decorator
     def generate_audio(
         self,
         dubbing_text: str,
@@ -336,7 +319,7 @@ class F5TTS:
 
         del self.ema_model
         self.ema_model = None
-        self.release_cuda_memory()
+        self.release_memory()
 
     def infer_multi(
         self,
@@ -400,7 +383,7 @@ class F5TTS:
         finally:
             del self.ema_model
             self.ema_model = None
-            self.release_cuda_memory()
+            self.release_memory()
 
     def _parse_conversation_regex(self, text):
         pattern = r"\{(\w+)\}\s*(.*)"

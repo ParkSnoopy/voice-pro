@@ -72,6 +72,13 @@ class GradioASR:
     def get_whisper_compute_types(self):
         return FasterWhisperInference.available_compute_types()
 
+    def get_whisper_default_compute_type(self):
+        compute_types = self.get_whisper_compute_types()
+        default_compute_type = self.user_config.get("whisper_compute_type", "float32")
+        if default_compute_type in compute_types:
+            return default_compute_type
+        return compute_types[0] if compute_types else "float32"
+
     # return Video, Audio, File
     def upload_source(
         self,
@@ -148,7 +155,7 @@ class GradioASR:
         return True
 
     def gradio_whisper_default(self):
-        return ["large", "english", "float16", False, 0]
+        return ["large", "english", self.get_whisper_default_compute_type(), False, 0]
 
     def transcribe(
         self,

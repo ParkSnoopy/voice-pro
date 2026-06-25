@@ -61,7 +61,9 @@ def create_ui(user_config: UserConfig):
         gradio_interface.load(None, None, None, js=f"() => {{{js}}}")
 
     gradio_interface.launch(
-        share=False, server_name=None, server_port=7910, inbrowser=True
+        share=False,
+        inbrowser=True,
+        **user_config.get_gradio_launch_kwargs(default_port=7910),
     )
 
 

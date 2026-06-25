@@ -80,6 +80,8 @@ class UserConfig:
             "compression_enable": True,
             "compression_crf": 23,
             "compression_preset": "medium",
+            "gradio_host": None,
+            "gradio_port": None,
         }
         self.user_config = self.load_user_config()
 
@@ -105,3 +107,16 @@ class UserConfig:
     def set(self, key, value):
         self.user_config[key] = value
         self.save_user_config()
+
+    def get_gradio_launch_kwargs(self, default_port):
+        host = self.get("gradio_host")
+        port = self.get("gradio_port")
+
+        if host == "":
+            host = None
+        if port in (None, ""):
+            port = default_port
+        else:
+            port = int(port)
+
+        return {"server_name": host, "server_port": port}

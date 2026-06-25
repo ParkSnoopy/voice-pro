@@ -71,6 +71,13 @@ class GradioLiveTranslate:
     def get_whisper_compute_types(self):
         return FasterWhisperInference.available_compute_types()
 
+    def get_whisper_default_compute_type(self):
+        compute_types = self.get_whisper_compute_types()
+        default_compute_type = self.user_config.get("whisper_compute_type", "float32")
+        if default_compute_type in compute_types:
+            return default_compute_type
+        return compute_types[0] if compute_types else "float32"
+
     def get_translate_languages(self) -> list:
         return self.generator.get_languages()
 

@@ -172,9 +172,6 @@ cython_debug/
 /rvc/configs
 /model/demucs
 /model/mdxnet-model
-requirements-cpu.txt
-requirements-gpu.txt
-temp_requirements.txt
 /model/whisper
 /model/f5-tts/voice_15s
 /model/f5-tts/E2TTS_Base

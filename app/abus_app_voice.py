@@ -106,7 +106,7 @@ def create_ui(user_config: UserConfig):
         )
         gradio_interface.load(None, None, None, js=f"() => {{{js}}}")
 
-    gradio_interface.launch()
+    gradio_interface.launch(**user_config.get_gradio_launch_kwargs(default_port=7860))
 
 
 def create_app_footer():

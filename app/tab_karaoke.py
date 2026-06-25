@@ -140,7 +140,7 @@ def karaoke_tab(user_config: UserConfig):
                 compute_type_dropdown = gr.Dropdown(
                     label=i18n("Compute Type"),
                     choices=studio.get_whisper_compute_types(),
-                    value=user_config.get("whisper_compute_type", "default"),
+                    value=studio.get_whisper_default_compute_type(),
                     info=i18n("Only for faster-whisper"),
                 )
                 highlight_checkbox = gr.Checkbox(

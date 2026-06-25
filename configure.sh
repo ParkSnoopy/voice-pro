@@ -42,11 +42,6 @@ else
     exit 1
 fi
 
-# Check for NVIDIA GPU
-if command -v nvidia-smi &> /dev/null; then
-    echo "NVIDIA GPU detected. Please ensure CUDA toolkit is installed if needed."
-    nvidia-smi
-fi
 
 
 echo ""
