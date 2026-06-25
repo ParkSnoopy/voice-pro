@@ -65,7 +65,7 @@ A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developer
 
 - Due to [WeConnect](https://www.wctokyoseoul.com) development work, Voice-Pro development and updates are not possible for the time being.
 - We have made all Voice-Pro code open source and completely free. Voice-Pro can now be freely distributed and modified by anyone.
-- It targets Linux CPU-only systems.
+- It targets Linux Vulkan systems.
 - Please leave your requests on the [![GitHub Issues](https://img.shields.io/github/issues/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/issues)  or  [![GitHub Discussions](https://img.shields.io/github/discussions/abus-aikorea/voice-pro)](https://github.com/abus-aikorea/voice-pro/discussions) pages.
 - **Troubleshooting**: In most cases, issues can be resolved by deleting the `installer` folder and then running `configure.sh` followed by `start.sh`.
 
@@ -119,7 +119,7 @@ A robust alternative to **ElevenLabs**, Voice-Pro empowers podcasters, developer
 <details>
 <summary>version 2.0</summary>
 
-- 🐍 Built with Python 3.12, Torch 2.8.0 CPU backend, and Gradio 5.14.0.
+- 🐍 Built with Python 3.12, Torch 2.12.1 Vulkan backend, and Gradio 5.14.0.
 - 🆓 Free trial supports media up to **60 seconds** in length.  
 - 🔥 Added the **AI Cover** feature.  
 - 🎤 Introduced support for **CosyVoice** and **kokoro**.  
@@ -414,7 +414,7 @@ git clone https://github.com/abus-aikorea/voice-pro.git
 
 ### 2. Install & Run
 1. 🚀 **configure.sh**
-   - Sets up git, ffmpeg, and build essentials for the CPU install
+   - Sets up git, ffmpeg, and build essentials for the Vulkan install
    - Run once; takes 1+ hour with internet
    - Don't close the terminal
 2. 🚀 **start.sh**

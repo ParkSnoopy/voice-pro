@@ -38,7 +38,7 @@ class OneClick:
             "UV_CACHE_DIR": os.path.join(install_dir, "uv-cache"),
             "PIP_CACHE_DIR": os.path.join(install_dir, "uv-cache"),
             "UV_PYTHON_INSTALL_DIR": os.path.join(install_dir, "uv-python"),
-            "UV_TORCH_BACKEND": "cpu",
+            "UV_TORCH_BACKEND": "vulkan",
             "MPLCONFIGDIR": os.path.join(install_dir, "matplotlib"),
             "TORCH_HOME": os.path.join(cls.app_model_path, ".torch"),
             "TORCH_EXTENSIONS_DIR": os.path.join(

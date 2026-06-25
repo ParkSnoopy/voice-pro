@@ -27,18 +27,18 @@ echo "Linux detected"
 if command -v apt-get &> /dev/null; then
     echo "Detected apt package manager"
     sudo apt-get update
-    sudo apt-get install -y git ffmpeg build-essential
+    sudo apt-get install -y git ffmpeg build-essential libopenblas0
 elif command -v yum &> /dev/null; then
     echo "Detected yum package manager"
-    sudo yum install -y git ffmpeg gcc gcc-c++ make
+    sudo yum install -y git ffmpeg gcc gcc-c++ make openblas
 elif command -v dnf &> /dev/null; then
     echo "Detected dnf package manager"
-    sudo dnf install -y git ffmpeg gcc gcc-c++ make
+    sudo dnf install -y git ffmpeg gcc gcc-c++ make openblas
 elif command -v pacman &> /dev/null; then
     echo "Detected pacman package manager"
-    sudo pacman -S --noconfirm git ffmpeg base-devel
+    sudo pacman -S --noconfirm git ffmpeg base-devel openblas
 else
-    echo "Unsupported Linux distribution. Please install git and ffmpeg manually."
+    echo "Unsupported Linux distribution. Please install git, ffmpeg, build tools, and OpenBLAS manually."
     exit 1
 fi
 

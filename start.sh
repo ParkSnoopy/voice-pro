@@ -49,7 +49,7 @@ export TEMP="$TMPDIR"
 export UV_CACHE_DIR="$INSTALL_DIR/uv-cache"
 export PIP_CACHE_DIR="$INSTALL_DIR/uv-cache"
 export UV_PYTHON_INSTALL_DIR="$INSTALL_DIR/uv-python"
-export UV_TORCH_BACKEND=cpu
+export UV_TORCH_BACKEND=vulkan
 mkdir -p "$HOME" "$TMPDIR" "$UV_CACHE_DIR" "$UV_PYTHON_INSTALL_DIR"
 
 # Create venv if needed

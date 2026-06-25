@@ -58,10 +58,10 @@ dependencies = [
     "uuid",
     "pydub==0.25.1",
     "f5-tts==1.1.10",
-    # PyTorch CPU wheels come from the explicit uv index below.
-    "torch==2.8.0",
-    "torchvision==0.23.0",
-    "torchaudio==2.8.0",
+    # PyTorch Vulkan wheels come from the explicit uv index below.
+    "torch==2.12.1+vulkan",
+    "torchvision==0.27.1+vulkan",
+    "torchaudio==2.11.0+vulkan",
     # CosyVoice
     "conformer==0.3.2",
     "diffusers==0.29.0",
@@ -88,13 +88,18 @@ dependencies = [
 
 [tool.uv]
 package = false
+override-dependencies = [
+    "torch==2.12.1+vulkan",
+    "torchvision==0.27.1+vulkan",
+    "torchaudio==2.11.0+vulkan",
+]
 
 [tool.uv.sources]
-torch = { index = "pytorch-cpu" }
-torchvision = { index = "pytorch-cpu" }
-torchaudio = { index = "pytorch-cpu" }
+torch = { index = "pytorch-vulkan" }
+torchvision = { index = "pytorch-vulkan" }
+torchaudio = { index = "pytorch-vulkan" }
 
 [[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
+name = "pytorch-vulkan"
+url = "https://parksnoopyinc.github.io/index/whl/vulkan/"
 explicit = true
