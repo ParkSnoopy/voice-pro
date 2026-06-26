@@ -42,7 +42,7 @@ class WhisperTimestampedInference:
         self.current_model_size = None
         self.model = None
         self.translatable_models = ["large", "large-v1", "large-v2", "large-v3"]
-        self.device = "cpu"
+        self.device = "vulkan"
         self.current_compute_type = "float32"
 
     @staticmethod

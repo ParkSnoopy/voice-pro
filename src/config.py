@@ -11,7 +11,7 @@ class UserConfig:
     def __init__(self, user_config_path):
         self.user_config_path = user_config_path
         self.default_user_config = {
-            "asr_engine": "faster-whisper",
+            "asr_engine": "whisper",
             "gradio_language": "Korean",
             "whisper_model": "large",
             "faster_whisper_model": "large",

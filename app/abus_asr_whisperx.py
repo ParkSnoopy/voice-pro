@@ -3,12 +3,19 @@ import sys
 
 
 import time
+import warnings
 import numpy as np
 from typing import BinaryIO, Union, Tuple, List
 from io import StringIO
 import re
 
 import whisper
+warnings.filterwarnings(
+    "ignore",
+    message="\\ntorchcodec is not installed correctly.*",
+    category=UserWarning,
+    module="pyannote\\.audio\\.core\\.io",
+)
 import whisperx
 from whisperx.utils import get_writer
 import gc

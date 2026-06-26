@@ -27,18 +27,18 @@ echo "Linux detected"
 if command -v apt-get &> /dev/null; then
     echo "Detected apt package manager"
     sudo apt-get update
-    sudo apt-get install -y git ffmpeg build-essential libopenblas0
+    sudo apt-get install -y git ffmpeg build-essential pkg-config libopenblas-dev libomp-dev libnuma-dev libvulkan-dev mesa-vulkan-drivers vulkan-tools glslang-tools libshaderc-dev spirv-tools
 elif command -v yum &> /dev/null; then
     echo "Detected yum package manager"
-    sudo yum install -y git ffmpeg gcc gcc-c++ make openblas
+    sudo yum install -y git ffmpeg gcc gcc-c++ make pkgconf-pkg-config openblas-devel libomp-devel numactl-devel vulkan-headers vulkan-loader-devel mesa-vulkan-drivers vulkan-tools glslang shaderc-devel spirv-tools
 elif command -v dnf &> /dev/null; then
     echo "Detected dnf package manager"
-    sudo dnf install -y git ffmpeg gcc gcc-c++ make openblas
+    sudo dnf install -y git ffmpeg gcc gcc-c++ make pkgconf-pkg-config openblas-devel libomp-devel numactl-devel vulkan-headers vulkan-loader-devel mesa-vulkan-drivers vulkan-tools glslang shaderc-devel spirv-tools
 elif command -v pacman &> /dev/null; then
     echo "Detected pacman package manager"
-    sudo pacman -S --noconfirm git ffmpeg base-devel openblas
+    sudo pacman -S --noconfirm git ffmpeg base-devel pkgconf openblas libomp numactl vulkan-headers vulkan-icd-loader mesa-vulkan-drivers vulkan-tools glslang shaderc spirv-tools
 else
-    echo "Unsupported Linux distribution. Please install git, ffmpeg, build tools, and OpenBLAS manually."
+    echo "Unsupported Linux distribution. Please install git, ffmpeg, build tools, OpenBLAS, OpenMP, NUMA, Vulkan, glslang, shaderc, and SPIR-V tools manually."
     exit 1
 fi
 
